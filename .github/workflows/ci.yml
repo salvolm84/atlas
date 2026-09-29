@@ -88,7 +88,7 @@ jobs:
       - name: Regenerate and compare
         run: |
           python3 scripts/build-catalog.py \
-            public/data/stellarium-catalog-source.tsv \
+            catalog-source/stellarium-catalog-source.tsv \
             public/data/catalog.json
           git diff --exit-code -- public/data/catalog.json
 

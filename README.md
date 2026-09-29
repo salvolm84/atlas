@@ -122,7 +122,7 @@ A `Site` carries the coordinates and an IANA time zone, and travels through `mak
 ### Rebuild the catalogue
 
 ```sh
-python3 scripts/build-catalog.py public/data/stellarium-catalog-source.tsv public/data/catalog.json
+python3 scripts/build-catalog.py catalog-source/stellarium-catalog-source.tsv public/data/catalog.json
 pnpm test:astronomy
 pnpm build:portable
 ```

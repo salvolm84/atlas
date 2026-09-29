@@ -59,15 +59,12 @@ for (const [name, page] of [
     `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Deep Sky Atlas</title><link rel="icon" href="./favicon.svg"><style>${css}</style></head><body data-page="${page}"><div id="root"></div><noscript>Enable JavaScript to use the atlas.</noscript><script>${js}</script></body></html>`,
   );
 }
-// The 11.7 MB Stellarium TSV is never read at runtime -- catalog.json is
-// inlined into the bundle -- yet compresses to 2.4 MB, about 42% of the
-// release download. The GPL corresponding source still ships: package-release
-// puts the same file under source/public/data/, together with build-catalog.py.
-const SOURCE_TSV = "stellarium-catalog-source.tsv";
-await cp(path.join(root, "public/data"), path.join(out, "data"), {
-  recursive: true,
-  filter: (from) => path.basename(from) !== SOURCE_TSV,
-});
+// public/data carries only what a reader should be able to open: the
+// catalogue, its provenance notice, the Stellarium licence and the generation
+// script. The 11.7 MB source TSV lives outside public/ precisely so it is
+// never served or shipped twice; package-release still embeds it under
+// source/catalog-source/ as the GPL corresponding source.
+await cp(path.join(root, "public/data"), path.join(out, "data"), { recursive: true });
 await cp(path.join(root, "public/favicon.svg"), path.join(out, "favicon.svg"));
 await mkdir(path.join(out, "third-party-licenses"), { recursive: true });
 const credits = [];
