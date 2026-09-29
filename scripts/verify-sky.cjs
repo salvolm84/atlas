@@ -3,20 +3,28 @@ const fs = require("node:fs"),
   Module = require("node:module"),
   assert = require("node:assert/strict"),
   ts = require("typescript");
-const file = path.resolve(__dirname, "../lib/sky.ts");
-const compiled = ts.transpileModule(fs.readFileSync(file, "utf8"), {
-  compilerOptions: {
-    module: ts.ModuleKind.CommonJS,
-    target: ts.ScriptTarget.ES2022,
-    esModuleInterop: true,
-    resolveJsonModule: true,
-  },
-}).outputText;
-const m = new Module(file, module);
-m.filename = file;
-m.paths = Module._nodeModulePaths(path.dirname(file));
-m._compile(compiled, file);
-const s = m.exports;
+// Transpile and load a project TypeScript module on bare Node, with no bundler.
+// `stubs` satisfies relative imports of other .ts files, which plain Node
+// cannot resolve, by handing back an already-loaded module.
+function load(relative, stubs = {}) {
+  const file = path.resolve(__dirname, relative);
+  const compiled = ts.transpileModule(fs.readFileSync(file, "utf8"), {
+    compilerOptions: {
+      module: ts.ModuleKind.CommonJS,
+      target: ts.ScriptTarget.ES2022,
+      esModuleInterop: true,
+      resolveJsonModule: true,
+    },
+  }).outputText;
+  const m = new Module(file, module);
+  m.filename = file;
+  m.paths = Module._nodeModulePaths(path.dirname(file));
+  const inherited = m.require.bind(m);
+  m.require = (id) => (Object.hasOwn(stubs, id) ? stubs[id] : inherited(id));
+  m._compile(compiled, file);
+  return m.exports;
+}
+const s = load("../lib/sky.ts");
 assert.equal(new Set(s.objects.filter((o) => o.messier).map((o) => o.messier)).size, 110);
 assert.equal(new Set(s.objects.filter((o) => o.caldwell).map((o) => o.caldwell)).size, 109);
 for (const o of s.objects) {
@@ -50,6 +58,29 @@ const phase = s.makeNight("2026-01-18").moonLight;
 assert(phase < 0.03);
 assert.equal(s.cardinal(270), "O");
 assert.equal(s.cardinal(359), "N");
+
+// Transit altitude and the never-rises boundary. These were duplicated as the
+// literals 44.6471 and -45.3529 in two components whose comparisons disagreed
+// at exactly dec -45.3529; both now derive from `observer`.
+assert.equal(s.transitAltitude(s.observer.latitude), 90);
+assert.equal(s.transitAltitude(-45.3529), 0);
+assert(s.neverRises(-45.3529), "dec at exactly 0 degrees transit must count as never rising");
+assert(s.neverRises(-60));
+assert(!s.neverRises(-45));
+assert(!s.neverRises(0));
+// Every object the catalogue lists as never rising must also score 0 all night.
+for (const o of s.objects.filter((o) => s.neverRises(o.dec))) {
+  assert.equal(s.targetNight(o, winter).hours, 0, o.key);
+  assert.equal(s.targetNight(o, winter).score, 0, o.key);
+}
+
+// Framing geometry moved to lib/framing.ts; check it still loads and agrees.
+const framing = load("../lib/framing.ts", { "./sky": s });
+const m31 = s.objects.find((o) => o.messier === 31);
+assert.equal(framing.frameFit({ major: null, minor: null, pa: 0 }, "s50", 0), null);
+assert.equal(typeof framing.frameFit(m31, "s50", 0), "boolean");
+// M31 is about 190' across, far wider than the S50's 1.38 x 2.45 degree frame.
+assert.equal(framing.frameFit(m31, "s50", 0), false);
 const north = { start: 315, span: 90 },
   south = { start: 135, span: 90 };
 for (const a of [315, 350, 0, 45]) assert(s.inSector(a, north));

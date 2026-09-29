@@ -25,6 +25,15 @@ export type DSO = {
 };
 export const objects = raw as DSO[];
 export const observer = new A.Observer(44.6471, 10.9252, 34);
+
+/**
+ * Highest altitude a declination can reach, at transit, from the observer's
+ * latitude. Derived from `observer` so the latitude is stated in one place.
+ */
+export const transitAltitude = (dec: number) => 90 - Math.abs(observer.latitude - dec);
+
+/** True when a declination never clears the observer's horizon. */
+export const neverRises = (dec: number) => transitAltitude(dec) <= 0;
 export const MONTHS = [
   "Gen",
   "Feb",

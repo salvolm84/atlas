@@ -23,6 +23,7 @@ import {
   clock,
   fmt,
   makeNight,
+  neverRises,
   objects,
   scopes,
   targetNight,
@@ -347,7 +348,7 @@ export default function Atlas({
                             fmt(r.peak, 0) +
                             "° max · " +
                             cardinal(r.peakAz)
-                          : r.o.dec < -45.3529
+                          : neverRises(r.o.dec)
                             ? "Non sorge da Modena"
                             : "Fuori finestra"}
                         {r.o.mag !== null ? " · mag " + fmt(r.o.mag, 1) : ""}

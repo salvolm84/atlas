@@ -24,6 +24,7 @@ import {
   photoAdvice,
   seasonal,
   surfaceBrightness,
+  transitAltitude,
   type ScopeId,
   type Sector,
   type TargetNight,
@@ -50,7 +51,7 @@ export function ObjectDetails({
     .filter((s) => best > 0 && s.hours >= best * 0.8)
     .map((s) => s.label)
     .join(" · ");
-  const maxPossible = 90 - Math.abs(44.6471 - o.dec),
+  const maxPossible = transitAltitude(o.dec),
     sb = surfaceBrightness(o);
   const chart = r.curve
     .filter((p) => p.sun < 5)
