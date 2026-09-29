@@ -18,9 +18,13 @@ export function FovView({ o, scope }: { o: DSO; scope: ScopeId }) {
     ok = loaded === key,
     err = failed === key;
   useEffect(() => {
+    // Once the image is in, there is nothing left to time out. Without this the
+    // timer still fired 30 s after every successful load, marking the survey
+    // failed and re-rendering for nothing.
+    if (ok) return;
     const timer = setTimeout(() => setFailed(key), 30000);
     return () => clearTimeout(timer);
-  }, [key]);
+  }, [key, ok]);
   const proj = (d: number) => (Math.tan((d / 2) * DEG) / Math.tan((field / 2) * DEG)) * 1000;
   const w = proj(f.width),
     h = proj(f.height),

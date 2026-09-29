@@ -69,7 +69,7 @@ pnpm format:check         # verify formatting without writing
 pnpm lint                 # ESLint
 pnpm exec tsc --noEmit    # TypeScript validation
 pnpm test:astronomy       # catalogue, dates, geometry and horizon regression checks
-pnpm test:site            # observing-location parsing and bounds
+pnpm test:ui              # location input, horizon dial keyboard and ARIA
 pnpm build:portable       # generate directly openable HTML in release-runtime/
 python3 scripts/package-release.py  # create versioned ZIP and SHA-256 checksums
 ```

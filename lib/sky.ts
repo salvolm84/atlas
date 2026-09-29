@@ -242,6 +242,22 @@ export const cardinal = (az: number) =>
   ["N", "NE", "E", "SE", "S", "SW", "W", "NW"][Math.round(bearing(az) / 45) % 8];
 export const inSector = (az: number, s: Sector) =>
   s.span >= 360 || bearing(az - s.start) <= s.span + 1e-9;
+
+/**
+ * Move a sector's start to `az`, holding its end still. The span is recomputed
+ * through `bearing`, so a sector that crosses north stays correct. Clamped to a
+ * 5° minimum, matching the dial's snap, so a handle cannot collapse the sector.
+ */
+export const sectorWithStart = (s: Sector, az: number): Sector => {
+  const start = bearing(az);
+  return { start, span: Math.max(5, bearing(s.start + s.span - start)) };
+};
+
+/** Move a sector's end to `az`, holding its start still. */
+export const sectorWithEnd = (s: Sector, az: number): Sector => ({
+  ...s,
+  span: Math.max(5, bearing(bearing(az) - s.start)),
+});
 export type TargetNight = {
   o: DSO;
   hours: number;

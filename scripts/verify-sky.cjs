@@ -92,6 +92,38 @@ const north = { start: 315, span: 90 },
 for (const a of [315, 350, 0, 45]) assert(s.inSector(a, north));
 for (const a of [46, 180, 314]) assert(!s.inSector(a, north));
 assert(s.inSector(180, { start: 180, span: 360 }));
+
+// Sector algebra, as the dial's drag and arrow keys drive it. The wrap-around
+// cases are the ones worth pinning: a sector crossing north must stay correct.
+{
+  const w = s.sectorWithStart,
+    e = s.sectorWithEnd;
+  // Moving the start holds the end still.
+  assert.deepEqual(w({ start: 90, span: 90 }, 100), { start: 100, span: 80 });
+  assert.deepEqual(w({ start: 90, span: 90 }, 80), { start: 80, span: 100 });
+  // Moving the end holds the start still.
+  assert.deepEqual(e({ start: 90, span: 90 }, 200), { start: 90, span: 110 });
+  assert.deepEqual(e({ start: 90, span: 90 }, 100), { start: 90, span: 10 });
+  // Crossing north: 315 -> 45 keeps its 90 degrees when either end moves.
+  assert.deepEqual(w({ start: 315, span: 90 }, 320), { start: 320, span: 85 });
+  assert.deepEqual(w({ start: 315, span: 90 }, 350), { start: 350, span: 55 });
+  assert.deepEqual(e({ start: 315, span: 90 }, 30), { start: 315, span: 75 });
+  assert.deepEqual(e({ start: 315, span: 90 }, 90), { start: 315, span: 135 });
+  // Negative and over-360 azimuths normalise rather than producing nonsense.
+  assert.deepEqual(w({ start: 10, span: 90 }, -5), { start: 355, span: 105 });
+  assert.deepEqual(w({ start: 10, span: 90 }, 365), { start: 5, span: 95 });
+  // A handle can never collapse the sector below the 5 degree minimum.
+  for (const az of [90, 91, 89, 95]) {
+    assert(e({ start: 90, span: 90 }, az).span >= 5, `end at ${az}`);
+    assert(w({ start: 90, span: 90 }, az).span >= 5, `start at ${az}`);
+  }
+  // Whatever comes out must be a sector inSector agrees with.
+  for (const az of [0, 5, 180, 355]) {
+    const next = w({ start: 315, span: 90 }, az);
+    assert(s.inSector(next.start, next), "the start must lie inside its own sector");
+    assert(next.span >= 5 && next.span <= 360);
+  }
+}
 assert.equal(s.targetNight(m42, winter, 30, "s50", north).hours, 0);
 const southResult = s.targetNight(m42, winter, 30, "s50", south);
 assert(southResult.hours > 0);

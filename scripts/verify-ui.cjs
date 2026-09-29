@@ -1,8 +1,9 @@
 /**
- * Checks the observing-location input path. astronomy-engine throws on a
- * non-finite latitude and the night is built during the atlas's own render, so
- * a coordinate that slips through validation takes the whole page down. These
- * assertions pin the boundaries that stop that happening.
+ * Interaction checks for the parts of the interface whose logic can go wrong
+ * silently: the observing-location input path, and the horizon dial's keyboard
+ * and assistive-technology exposure. Deliberately free of a DOM library -- the
+ * behaviour is pure functions, and the ARIA is checked by server-rendering the
+ * real component.
  */
 const fs = require("node:fs"),
   path = require("node:path"),
@@ -100,4 +101,60 @@ console.trace = () => {}; // astronomy-engine traces before it throws
 assert.throws(() => sky.observerFor({ ...sky.MODENA, latitude: NaN }));
 console.trace = trace;
 
-console.log(JSON.stringify({ passed: true, checks: "site draft parsing and bounds" }, null, 2));
+// ---------------------------------------------------------------------------
+// The horizon dial's keyboard handling. The dial used to be pointer-only.
+// ---------------------------------------------------------------------------
+const { renderToStaticMarkup } = require("react-dom/server");
+const React = require("react");
+const dial = load("../app/horizon.tsx", {
+  react: React,
+  "@/components/ui/slider": { Slider: () => null },
+  "@/lib/sky": sky,
+});
+
+// Key to degrees. Arrows match the 5 degree snap the pointer uses; Page
+// Up/Down jump a compass point; anything else must return 0 so the key keeps
+// its default behaviour and the page is not hijacked.
+assert.equal(dial.sectorKeyDelta("ArrowRight"), 5);
+assert.equal(dial.sectorKeyDelta("ArrowUp"), 5);
+assert.equal(dial.sectorKeyDelta("ArrowLeft"), -5);
+assert.equal(dial.sectorKeyDelta("ArrowDown"), -5);
+assert.equal(dial.sectorKeyDelta("PageUp"), 45);
+assert.equal(dial.sectorKeyDelta("PageDown"), -45);
+for (const key of ["Enter", " ", "Tab", "Escape", "a", "Home", "End", ""])
+  assert.equal(dial.sectorKeyDelta(key), 0, `${key} must not move a handle`);
+
+// A keypress composed with the sector algebra must land where the arrow points.
+const pressed = sky.sectorWithStart(
+  { start: 315, span: 90 },
+  315 + dial.sectorKeyDelta("ArrowRight"),
+);
+assert.deepEqual(pressed, { start: 320, span: 85 });
+
+// The handles must actually reach assistive technology: focusable, named, and
+// reporting a value. Server-rendered from the real component, not asserted by
+// eye over the source.
+const markup = renderToStaticMarkup(
+  React.createElement(dial.HorizonFilter, {
+    sector: { start: 315, span: 90 },
+    onChange: () => {},
+  }),
+);
+const sliders = markup.match(/role="slider"/g) ?? [];
+assert.equal(sliders.length, 2, "the dial exposes two slider handles");
+assert.equal((markup.match(/tabindex="0"/g) ?? []).length, 2, "both handles are tabbable");
+assert(markup.includes('aria-label="Sector start azimuth"'));
+assert(markup.includes('aria-label="Sector end azimuth"'));
+assert(markup.includes('aria-valuetext="NW, 315 degrees"'), "start announces its bearing");
+assert(markup.includes('aria-valuetext="NE, 45 degrees"'), "end announces its bearing");
+assert(markup.includes('aria-valuemin="0"') && markup.includes('aria-valuemax="359"'));
+// Decorative geometry must not be announced alongside the handles.
+assert((markup.match(/aria-hidden="true"/g) ?? []).length >= 8, "decorative parts are hidden");
+
+console.log(
+  JSON.stringify(
+    { passed: true, checks: ["site draft parsing and bounds", "horizon dial keyboard and ARIA"] },
+    null,
+    2,
+  ),
+);
