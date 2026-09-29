@@ -4,7 +4,9 @@ Stellarium DSO catalog version 3.23 standard:
 https://github.com/Stellarium/stellarium/blob/master/nebulae/default/catalog.txt
 Copyright Stellarium contributors. Distributed under GNU GPL version 2 or later,
 following the Stellarium repository license. See COPYING-Stellarium.txt.
-The unmodified source TSV is included as stellarium-catalog-source.tsv.
+The unmodified source TSV is included as stellarium-catalog-source.tsv: beside
+this notice in the repository, and under source/public/data/ in the packaged
+release, where it accompanies build-catalog.py as the corresponding source.
 The derived selection, Italian labels and unit conversions in catalog.json are
 also provided under GPL-2.0-or-later. Transformation source: build-catalog.py.
 Coordinates and morphology are retained from the source; distances in kpc are
