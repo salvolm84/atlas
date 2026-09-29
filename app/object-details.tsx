@@ -2,7 +2,14 @@
 import { useMemo } from "react";
 import { ArrowUpRight, Cloud, Stars } from "lucide-react";
 import { ChartContainer, ChartTooltip } from "@/components/ui/chart";
-import { cloudAt, cloudOverWindows, describeCloud, type CloudForecast } from "@/lib/weather";
+import {
+  buildOutlook,
+  cloudAt,
+  cloudBandClass,
+  cloudOverWindows,
+  describeCloud,
+  type CloudForecast,
+} from "@/lib/weather";
 import {
   Area,
   ComposedChart,
@@ -23,9 +30,11 @@ import {
   distanceText,
   fmt,
   fov,
+  makeNight,
   photoAdvice,
   seasonal,
   surfaceBrightness,
+  targetNight,
   transitAltitude,
   type Site,
   type ScopeId,
@@ -41,6 +50,10 @@ export function ObjectDetails({
   sector,
   site,
   clouds,
+  outlook,
+  outlookDays,
+  today,
+  onPickDate,
 }: {
   r: TargetNight;
   day: string;
@@ -49,6 +62,10 @@ export function ObjectDetails({
   sector: Sector;
   site: Site;
   clouds: CloudForecast;
+  outlook: CloudForecast;
+  outlookDays: string[];
+  today: string;
+  onPickDate: (day: string) => void;
 }) {
   const o = r.o,
     year = Number(day.slice(0, 4));
@@ -78,6 +95,21 @@ export function ObjectDetails({
   // Mean cover across this target's useful windows, which is the number that
   // decides whether tonight is worth setting up for.
   const windowCloud = cloudHours.length ? cloudOverWindows(cloudHours, r.windows) : null;
+  // Astronomy for each coming night, paired with its forecast. makeNight is
+  // cached per site and date, so changing object only redoes the cheap half.
+  const nights = useMemo(
+    () =>
+      buildOutlook(
+        outlookDays,
+        (d) => {
+          const result = targetNight(o, makeNight(d, site), minAlt, scope, sector);
+          return { hours: result.hours, windows: result.windows };
+        },
+        outlook.state === "ready" ? outlook.hours : [],
+      ),
+    [outlookDays, o, site, minAlt, scope, sector, outlook],
+  );
+  const clearNights = nights.filter((n) => n.promising).length;
   return (
     <article className="object-panel">
       <header className="object-title">
@@ -285,6 +317,70 @@ export function ObjectDetails({
             {r.moonSeparation === null ? "Moon absent / no window" : fmt(r.moonSeparation, 0) + "°"}
           </b>
           .
+        </p>
+      </section>
+      <section className="outlook-detail">
+        <div className="section-heading">
+          <div>
+            <p className="eyebrow">The next {outlookDays.length} nights</p>
+            <h3>
+              {outlook.state === "loading"
+                ? "Checking the forecast\u2026"
+                : outlook.state === "unavailable"
+                  ? "Usable nights for " + o.key
+                  : clearNights > 0
+                    ? `${clearNights} promising ${clearNights === 1 ? "night" : "nights"} for ${o.key}`
+                    : "No clear night forecast for " + o.key}
+            </h3>
+          </div>
+          <span className="tag">Threshold {minAlt}\u00b0</span>
+        </div>
+        <div className="outlook-grid">
+          {nights.map((night) => {
+            const selected = night.day === day;
+            const band = cloudBandClass(night.cloud);
+            return (
+              <button
+                key={night.day}
+                className={
+                  "outlook-night" +
+                  (selected ? " selected" : "") +
+                  (night.promising ? " promising" : "") +
+                  (night.hours === 0 ? " unusable" : "")
+                }
+                onClick={() => onPickDate(night.day)}
+                aria-pressed={selected}
+                aria-label={
+                  `${night.day}: ` +
+                  (night.hours === 0 ? `${o.key} not usable` : `${fmt(night.hours)} useful hours`) +
+                  ", " +
+                  (night.cloud === null
+                    ? "no forecast"
+                    : `${fmt(night.cloud, 0)} per cent cloud, ${describeCloud(night.cloud)}`) +
+                  (night.day === today ? ", tonight" : "")
+                }
+              >
+                <strong>
+                  {night.day === today
+                    ? "Tonight"
+                    : new Date(night.day + "T12:00:00").toLocaleDateString("en-GB", {
+                        weekday: "short",
+                        day: "numeric",
+                      })}
+                </strong>
+                <span>{night.hours === 0 ? "\u2014" : fmt(night.hours) + " h"}</span>
+                <span className={"outlook-cloud " + band}>
+                  {night.cloud === null ? "no data" : fmt(night.cloud, 0) + "%"}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+        <p className="caption">
+          Useful hours come from the same altitude, darkness and sector filters as the list; mean
+          cloud is the forecast across those hours only. The two are reported side by side and never
+          combined \u2014 pick the night yourself. Select a night to plan it.
+          {outlook.state === "unavailable" ? " " + outlook.reason : ""}
         </p>
       </section>
       <section className="season-detail">

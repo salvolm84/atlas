@@ -174,6 +174,16 @@ export function localTime(day: string, hour: number, site: Site): Date {
   }
   return new Date(guess);
 }
+/** `count` consecutive dates starting at `day`, as YYYY-MM-DD. */
+export function daysFrom(day: string, count: number): string[] {
+  const out: string[] = [];
+  let cursor = day;
+  for (let i = 0; i < count; i++) {
+    out.push(cursor);
+    cursor = nextDate(cursor);
+  }
+  return out;
+}
 export function nextDate(day: string) {
   const d = new Date(day + "T12:00:00Z");
   d.setUTCDate(d.getUTCDate() + 1);
@@ -232,7 +242,9 @@ export function makeNight(day: string, site: Site): Night {
     moonLight: A.Illumination(A.Body.Moon, midnight).phase_fraction,
     rotation: A.Rotation_EQJ_EQD(midnight),
   };
-  if (nightCache.size > 32) nightCache.delete(nightCache.keys().next().value!);
+  // 16 outlook nights + 12 seasonality months + the selected night exceeds 32,
+  // which used to evict entries that were about to be read again.
+  if (nightCache.size > 128) nightCache.delete(nightCache.keys().next().value!);
   nightCache.set(key, n);
   return n;
 }

@@ -21,8 +21,11 @@ import {
   cardinal,
   clock,
   fmt,
+  daysFrom,
   makeNight,
+  nextDate,
   MODENA,
+  siteDate,
   siteKey,
   neverRises,
   objects,
@@ -35,7 +38,7 @@ import {
 import { Choice } from "./choice";
 import { ObjectDetails } from "./object-details";
 import { SitePicker } from "./site-picker";
-import { fetchClouds, type CloudForecast } from "@/lib/weather";
+import { fetchClouds, fetchCloudRange, OUTLOOK_NIGHTS, type CloudForecast } from "@/lib/weather";
 
 // Stable identity, so a render while loading is not a new prop every time.
 const CLOUDS_LOADING: CloudForecast = { state: "loading" };
@@ -86,6 +89,26 @@ export default function Atlas({
       .catch(() => {}); // only ever an abort; the fetch reports its own failures
     return () => controller.abort();
   }, [site, day, cloudKey]);
+
+  // "Today" is the site's calendar day, not the browser's.
+  const today = siteDate(new Date(), site);
+  const outlookDays = useMemo(() => daysFrom(today, OUTLOOK_NIGHTS), [today]);
+  const [outlookLoaded, setOutlookLoaded] = useState<{
+    key: string;
+    value: CloudForecast;
+  } | null>(null);
+  const outlookKey = siteKey(site) + "|" + today;
+  const outlook: CloudForecast =
+    outlookLoaded?.key === outlookKey ? outlookLoaded.value : CLOUDS_LOADING;
+  useEffect(() => {
+    const controller = new AbortController();
+    // A night runs past midnight, so the last one needs the day after it too,
+    // or its late hours fall outside the range and read as "no data".
+    fetchCloudRange(site, today, nextDate(outlookDays.at(-1)!), controller.signal)
+      .then((value) => setOutlookLoaded({ key: outlookKey, value }))
+      .catch(() => {});
+    return () => controller.abort();
+  }, [site, today, outlookDays, outlookKey]);
   const ranked = useMemo(
     () =>
       objects
@@ -408,6 +431,10 @@ export default function Atlas({
                   sector={detailSector}
                   site={site}
                   clouds={clouds}
+                  outlook={outlook}
+                  outlookDays={outlookDays}
+                  today={today}
+                  onPickDate={pickDate}
                 />
               </ErrorBoundary>
             ) : (

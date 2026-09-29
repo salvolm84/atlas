@@ -160,17 +160,28 @@ const weather = load("../lib/weather.ts", { "./sky": sky });
 // The URL must not leak a precise position: coordinates are rounded to about
 // a kilometre, which is finer than the forecast grid anyway.
 const url = new URL(
-  weather.cloudUrl({ ...sky.MODENA, latitude: 44.64713456, longitude: 10.92521 }, "2026-01-15"),
+  weather.cloudUrl(
+    { ...sky.MODENA, latitude: 44.64713456, longitude: 10.92521 },
+    "2026-01-15",
+    "2026-01-16",
+  ),
 );
 assert.equal(url.searchParams.get("latitude"), "44.65");
 assert.equal(url.searchParams.get("longitude"), "10.93");
 assert.equal(url.searchParams.get("timeformat"), "unixtime");
 assert.equal(url.searchParams.get("start_date"), "2026-01-15");
-assert.equal(url.searchParams.get("end_date"), "2026-01-16", "the night runs into the next day");
+assert.equal(url.searchParams.get("end_date"), "2026-01-16", "the range end is explicit");
+// The night wrapper must ask for the following day, since a night crosses midnight.
+const nightUrl = new URL(weather.cloudUrl(sky.MODENA, "2026-01-31", sky.nextDate("2026-01-31")));
+assert.equal(nightUrl.searchParams.get("end_date"), "2026-02-01");
 assert.equal(url.searchParams.get("hourly"), "cloud_cover");
 // A southern, negative-coordinate site must round toward the right sign.
 const south = new URL(
-  weather.cloudUrl({ ...sky.MODENA, latitude: -33.8688, longitude: -70.6693 }, "2026-01-15"),
+  weather.cloudUrl(
+    { ...sky.MODENA, latitude: -33.8688, longitude: -70.6693 },
+    "2026-01-15",
+    "2026-01-16",
+  ),
 );
 assert.equal(south.searchParams.get("latitude"), "-33.87");
 assert.equal(south.searchParams.get("longitude"), "-70.67");
@@ -233,6 +244,79 @@ assert(Number.isNaN(partial.mean));
 // No windows at all must not divide by zero.
 assert.equal(weather.cloudOverWindows(hours, []).total, 0);
 
+// --- the coming-nights outlook ---------------------------------------------
+// Astronomy and forecast stay side by side: a night with no forecast still
+// reports its usable hours, because the astronomy is known either way.
+const H = 3600000;
+const base = 1790726400000;
+const clear = [];
+const murky = [];
+for (let i = 0; i < 6; i++) {
+  clear.push({ ms: base + i * H, cloud: 5 });
+  murky.push({ ms: base + i * H, cloud: 95 });
+}
+const window2h = (start) => ({ hours: 2, windows: [{ start, end: start + 2 * H }] });
+
+{
+  const days = ["2026-01-15", "2026-01-16", "2026-01-17"];
+  const usable = (d) => (d === "2026-01-16" ? { hours: 0, windows: [] } : window2h(base));
+
+  const good = weather.buildOutlook(days, usable, clear);
+  assert.equal(good.length, 3);
+  assert.equal(good[0].hours, 2);
+  assert.equal(good[0].cloud, 5);
+  assert.equal(good[0].promising, true, "usable and clear is promising");
+  // A night the target is not up cannot be promising however clear it is.
+  assert.equal(good[1].hours, 0);
+  assert.equal(good[1].cloud, null, "no window means nothing to average over");
+  assert.equal(good[1].promising, false);
+
+  // Clear sky, no usable window -> not promising. Usable window, overcast ->
+  // not promising. Neither half alone is enough.
+  const bad = weather.buildOutlook(days, usable, murky);
+  assert.equal(bad[0].hours, 2, "hours are unchanged by the weather");
+  assert.equal(bad[0].cloud, 95);
+  assert.equal(bad[0].promising, false, "overcast is not promising");
+
+  // With no forecast at all, hours survive and cloud is simply unknown.
+  const blind = weather.buildOutlook(days, usable, []);
+  assert.equal(blind[0].hours, 2, "astronomy does not depend on the forecast");
+  assert.equal(blind[0].cloud, null);
+  assert.equal(blind[0].promising, false, "unknown weather is never promising");
+
+  // The promising threshold sits at 30%, matching the "mostly clear" band.
+  const at29 = weather.buildOutlook(["d"], () => window2h(base), [{ ms: base, cloud: 29 }]);
+  const at30 = weather.buildOutlook(["d"], () => window2h(base), [{ ms: base, cloud: 30 }]);
+  assert.equal(at29[0].promising, true);
+  assert.equal(at30[0].promising, false);
+  // And a night with under an hour usable is not worth setting up for.
+  const brief = weather.buildOutlook(
+    ["d"],
+    () => ({ hours: 0.75, windows: [{ start: base, end: base + 0.75 * H }] }),
+    clear,
+  );
+  assert.equal(brief[0].promising, false, "under an hour is not promising");
+}
+
+// Class names must be single tokens: describeCloud's prose has spaces in it
+// and would silently become two classes.
+for (const p of [null, 0, 11, 12, 45, 70, 100]) {
+  const slug = weather.cloudBandClass(p);
+  assert(!/\s/.test(slug), `band class "${slug}" must not contain whitespace`);
+}
+assert.equal(weather.cloudBandClass(null), "unknown");
+assert.equal(weather.cloudBandClass(5), "clear");
+assert.equal(weather.cloudBandClass(20), "mostly-clear");
+assert.equal(weather.cloudBandClass(45), "partly-cloudy");
+assert.equal(weather.cloudBandClass(70), "mostly-cloudy");
+assert.equal(weather.cloudBandClass(90), "overcast");
+
+// Dates must roll over months and leap days, since the outlook walks forward.
+assert.deepEqual(sky.daysFrom("2026-01-30", 3), ["2026-01-30", "2026-01-31", "2026-02-01"]);
+assert.deepEqual(sky.daysFrom("2028-02-28", 3), ["2028-02-28", "2028-02-29", "2028-03-01"]);
+assert.deepEqual(sky.daysFrom("2026-12-31", 2), ["2026-12-31", "2027-01-01"]);
+assert.equal(sky.daysFrom("2026-01-01", weather.OUTLOOK_NIGHTS).length, weather.OUTLOOK_NIGHTS);
+
 console.log(
   JSON.stringify(
     {
@@ -241,6 +325,7 @@ console.log(
         "site draft parsing and bounds",
         "horizon dial keyboard and ARIA",
         "cloud forecast parsing",
+        "coming-nights outlook",
       ],
     },
     null,

@@ -89,6 +89,7 @@ The existing `pnpm build` / `pnpm start` scripts target the original hosted Work
 | `app/fov-view.tsx` | Seestar field-of-view simulator over the survey image |
 | `app/choice.tsx` | Shared labelled `Select` used by the controls |
 | `app/site-picker.tsx` | Observing-location picker: geolocation and manual coordinates |
+| `lib/weather.ts` | Cloud forecast fetching, summarising and the coming-nights outlook |
 | `app/horizon.tsx` | Circular horizon selector and direction-by-time table |
 | `lib/sky.ts` | Astronomy, the `Site` type, telescope specifications and scoring |
 | `lib/framing.ts` | Frame-fit geometry, independent of React |
@@ -126,7 +127,7 @@ Review provenance and licensing before adding another data source. The generatio
 - Seasonality samples the 15th of each month. “Best” months have at least 80% of the maximum monthly useful duration, with the same altitude/sector constraints and no lunar penalty.
 - Integrated magnitude is not surface brightness. Average surface brightness is an estimate from magnitude and an elliptical catalogue area; it is not intrinsic luminosity.
 - Buildings, trees, humidity, seeing, atmospheric extinction and local light pollution are not modelled. The horizon sector is a simple user-defined azimuth mask, not an obstacle map.
-- Cloud cover is fetched from [Open-Meteo](https://open-meteo.com/) and displayed beside the night chart. It is **not** part of the 0–100 score, which stays a purely astronomical, offline, reproducible figure. The forecast reaches roughly sixteen days ahead and needs the internet; outside that it is simply absent. Coordinates are rounded to about a kilometre before being sent.
+- Cloud cover is fetched from [Open-Meteo](https://open-meteo.com/) and displayed beside the night chart, and as a strip of the coming nights showing usable hours against forecast cloud for the selected target. Usable hours and cloud are always shown separately and never combined into one figure. It is **not** part of the 0–100 score, which stays a purely astronomical, offline, reproducible figure. The forecast reaches roughly sixteen days ahead and needs the internet; outside that it is simply absent. Coordinates are rounded to about a kilometre before being sent.
 
 ### Telescope geometry
 

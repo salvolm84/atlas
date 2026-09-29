@@ -23,14 +23,14 @@ export type CloudForecast =
  * The forecast grid is coarser than that, so nothing is lost, and a precise
  * position from the geolocation button is not handed to a third party.
  */
-export function cloudUrl(site: Site, day: string) {
+export function cloudUrl(site: Site, startDay: string, endDay: string) {
   const q = new URLSearchParams({
     latitude: site.latitude.toFixed(2),
     longitude: site.longitude.toFixed(2),
     hourly: "cloud_cover",
     timeformat: "unixtime",
-    start_date: day,
-    end_date: nextDate(day),
+    start_date: startDay,
+    end_date: endDay,
   });
   return `${ENDPOINT}?${q}`;
 }
@@ -50,6 +50,20 @@ export function cloudAt(hours: CloudHour[], ms: number): number | null {
   // Beyond half an hour there is no sample for this time, so report nothing
   // rather than stretching a neighbouring hour across a gap.
   return best && bestGap <= 30 * 60000 ? best.cloud : null;
+}
+
+/**
+ * Slug for the same bands, safe to use as a CSS class. Kept separate from
+ * describeCloud, whose prose contains spaces and would silently become two
+ * class names.
+ */
+export function cloudBandClass(percent: number | null) {
+  if (percent === null) return "unknown";
+  if (percent < 12) return "clear";
+  if (percent < 30) return "mostly-clear";
+  if (percent < 60) return "partly-cloudy";
+  if (percent < 85) return "mostly-cloudy";
+  return "overcast";
 }
 
 /** Plain-language band for a cloud percentage. */
@@ -120,17 +134,18 @@ export function readCloudPayload(body: Payload): CloudForecast {
 
 const cache = new Map<string, CloudForecast>();
 
-export async function fetchClouds(
+export async function fetchCloudRange(
   site: Site,
-  day: string,
+  startDay: string,
+  endDay: string,
   signal?: AbortSignal,
 ): Promise<CloudForecast> {
-  const key = siteKey(site) + "|" + day;
+  const key = `${siteKey(site)}|${startDay}|${endDay}`;
   const cached = cache.get(key);
   if (cached) return cached;
   let result: CloudForecast;
   try {
-    const response = await fetch(cloudUrl(site, day), { signal });
+    const response = await fetch(cloudUrl(site, startDay, endDay), { signal });
     result = readCloudPayload(await response.json());
   } catch (error) {
     if ((error as Error)?.name === "AbortError") throw error;
@@ -144,4 +159,45 @@ export async function fetchClouds(
   if (cache.size > 64) cache.delete(cache.keys().next().value!);
   cache.set(key, result);
   return result;
+}
+
+/** The night runs from `day` noon into the next day, so it needs both dates. */
+export const fetchClouds = (site: Site, day: string, signal?: AbortSignal) =>
+  fetchCloudRange(site, day, nextDate(day), signal);
+
+/** How many nights ahead the outlook offers. Open-Meteo reaches about 16 days. */
+export const OUTLOOK_NIGHTS = 14;
+
+export type OutlookNight = {
+  day: string;
+  /** Useful hours for the target that night, under the current filters. */
+  hours: number;
+  /** Mean cloud across those useful windows, or null where the forecast has none. */
+  cloud: number | null;
+  /** True when the night is both usable and forecast clearer than partly cloudy. */
+  promising: boolean;
+};
+
+/**
+ * Ranks the coming nights for one target: usable hours from the astronomy,
+ * cloud from the forecast, kept side by side rather than merged into a single
+ * number. A night with no forecast still reports its hours, because the
+ * astronomy is known even when the weather is not.
+ */
+export function buildOutlook(
+  days: string[],
+  usableHours: (day: string) => { hours: number; windows: { start: number; end: number }[] },
+  hours: CloudHour[],
+): OutlookNight[] {
+  return days.map((day) => {
+    const { hours: usable, windows } = usableHours(day);
+    const summary = hours.length ? cloudOverWindows(hours, windows) : null;
+    const cloud = summary && summary.covered > 0 ? summary.mean : null;
+    return {
+      day,
+      hours: usable,
+      cloud,
+      promising: usable >= 1 && cloud !== null && cloud < 30,
+    };
+  });
 }
