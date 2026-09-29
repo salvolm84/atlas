@@ -10,6 +10,7 @@ import {
   describeCloud,
   type CloudForecast,
 } from "@/lib/weather";
+import type { DetailResult } from "@/lib/solver-types";
 import {
   Area,
   ComposedChart,
@@ -30,50 +31,69 @@ import {
   distanceText,
   fmt,
   fov,
-  makeNight,
   photoAdvice,
-  seasonal,
   surfaceBrightness,
-  targetNight,
   transitAltitude,
+  type DSO,
   type Site,
   type ScopeId,
-  type Sector,
   type TargetNight,
 } from "@/lib/sky";
 import { FovView } from "./fov-view";
-export function ObjectDetails({
-  r,
-  day,
-  minAlt,
-  scope,
-  sector,
-  site,
-  clouds,
-  outlook,
-  outlookDays,
-  today,
-  onPickDate,
-}: {
-  r: TargetNight;
+type PanelProps = {
+  o: DSO;
+  detail: DetailResult | null;
   day: string;
   minAlt: number;
   scope: ScopeId;
-  sector: Sector;
   site: Site;
   clouds: CloudForecast;
   outlook: CloudForecast;
   outlookDays: string[];
   today: string;
   onPickDate: (day: string) => void;
-}) {
-  const o = r.o,
-    year = Number(day.slice(0, 4));
-  const seasons = useMemo(
-      () => seasonal(o, year, site, minAlt, sector),
-      [o, year, site, minAlt, sector],
-    ),
-    best = Math.max(...seasons.map((s) => s.hours));
+};
+
+export function ObjectDetails(props: PanelProps) {
+  // The night's figures are computed off the main thread, so the panel has a
+  // moment with an object but no numbers. Show its identity rather than a
+  // spinner over the whole panel: the heading is known immediately.
+  if (!props.detail)
+    return (
+      <article className="object-panel">
+        <header className="object-title">
+          <div>
+            <p className="eyebrow">
+              {props.o.key} <span> / {props.o.kind}</span>
+            </p>
+            <h2>{props.o.name}</h2>
+          </div>
+        </header>
+        <p className="caption">Computing tonight&apos;s window\u2026</p>
+      </article>
+    );
+  return <ObjectPanel {...props} detail={props.detail} />;
+}
+
+function ObjectPanel({
+  o,
+  detail,
+  day,
+  minAlt,
+  scope,
+  site,
+  clouds,
+  outlook,
+  outlookDays,
+  today,
+  onPickDate,
+}: PanelProps & { detail: DetailResult }) {
+  const year = Number(day.slice(0, 4));
+  // Everything astronomical arrives already computed; this component only
+  // presents it.
+  const r: TargetNight = useMemo(() => ({ o, ...detail.target }), [o, detail]);
+  const seasons = detail.seasons;
+  const best = Math.max(...seasons.map((s) => s.hours));
   const bestMonths = seasons
     .filter((s) => best > 0 && s.hours >= best * 0.8)
     .map((s) => s.label)
@@ -97,18 +117,14 @@ export function ObjectDetails({
   const windowCloud = cloudHours.length ? cloudOverWindows(cloudHours, r.windows) : null;
   // Astronomy for each coming night, paired with its forecast. makeNight is
   // cached per site and date, so changing object only redoes the cheap half.
-  const nights = useMemo(
-    () =>
-      buildOutlook(
-        outlookDays,
-        (d) => {
-          const result = targetNight(o, makeNight(d, site), minAlt, scope, sector);
-          return { hours: result.hours, windows: result.windows };
-        },
-        outlook.state === "ready" ? outlook.hours : [],
-      ),
-    [outlookDays, o, site, minAlt, scope, sector, outlook],
-  );
+  const nights = useMemo(() => {
+    const solved = new Map(detail.outlook.map((n) => [n.day, n]));
+    return buildOutlook(
+      outlookDays,
+      (d) => solved.get(d) ?? { hours: 0, windows: [] },
+      outlook.state === "ready" ? outlook.hours : [],
+    );
+  }, [outlookDays, detail, outlook]);
   const clearNights = nights.filter((n) => n.promising).length;
   return (
     <article className="object-panel">

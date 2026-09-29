@@ -10,6 +10,7 @@
     "test:astronomy": "node scripts/verify-sky.cjs",
     "test:ui": "node scripts/verify-ui.cjs",
     "test:pwa": "node scripts/verify-pwa.cjs",
+    "test:solver": "node scripts/verify-solver.cjs",
     "install:ci": "bash scripts/install-pnpm.sh",
     "dev": "node scripts/run-framework.mjs dev",
     "build": "node scripts/run-framework.mjs build",

@@ -30,7 +30,6 @@ import {
   neverRises,
   objects,
   scopes,
-  targetNight,
   type ScopeId,
   type Site,
   type Sector,
@@ -38,6 +37,8 @@ import {
 import { Choice } from "./choice";
 import { ObjectDetails } from "./object-details";
 import { SitePicker } from "./site-picker";
+import { useDetail, useRanked, useSolver } from "@/hooks/use-solver";
+import { toSolverObject, type NightParams } from "@/lib/solver-types";
 import { fetchClouds, fetchCloudRange, OUTLOOK_NIGHTS, type CloudForecast } from "@/lib/weather";
 
 // Stable identity, so a render while loading is not a new prop every time.
@@ -109,18 +110,29 @@ export default function Atlas({
       .catch(() => {});
     return () => controller.abort();
   }, [site, today, outlookDays, outlookKey]);
+  // The 248-object sweep runs in a worker. It receives only the six fields the
+  // astronomy reads, so the catalogue stays here and out of the worker bundle.
+  const solverObjects = useMemo(() => objects.map(toSolverObject), []);
+  const solver = useSolver(solverObjects);
+  const byId = useMemo(() => new Map(objects.map((o) => [o.id, o])), []);
+  const params = useMemo<NightParams>(
+    () => ({ day, site, minAlt: Number(minAlt), scope, sector: nightSector }),
+    [day, site, minAlt, scope, nightSector],
+  );
+  const rankRows = useRanked(solver, params);
   const ranked = useMemo(
     () =>
-      objects
-        .map((o) => targetNight(o, n, Number(minAlt), scope, nightSector))
+      rankRows
+        ?.map((row) => ({ ...row, o: byId.get(row.id)! }))
         .sort(
           (a, b) =>
             b.score - a.score ||
             b.hours - a.hours ||
-            a.o.key.localeCompare(b.o.key, "it", { numeric: true }),
-        ),
-    [n, minAlt, scope, nightSector],
+            a.o.key.localeCompare(b.o.key, "en", { numeric: true }),
+        ) ?? null,
+    [rankRows, byId],
   );
+  const solving = ranked === null;
   const filtered = useMemo(() => {
     // Normalise the query once, not once per catalogue entry.
     const q = query
@@ -128,7 +140,7 @@ export default function Atlas({
       .replace(/messier/g, "m")
       .replace(/caldwell/g, "c")
       .replace(/\s/g, "");
-    return ranked.filter((r) => {
+    return (ranked ?? []).filter((r) => {
       const o = r.o;
       return (
         (mode !== "night" || r.score > 0) &&
@@ -155,7 +167,14 @@ export default function Atlas({
   // has already filtered out. The user's own pick is kept, so relaxing a filter
   // brings their object back rather than stranding them on rows[0].
   const activeId = rows.some((r) => r.o.id === selected) ? selected : rows[0]?.o.id;
-  const current = activeId ? ranked.find((r) => r.o.id === activeId) : undefined;
+  const current = activeId ? byId.get(activeId) : undefined;
+  // The panel keeps lagging the dial by a frame, so dragging does not queue a
+  // detail request per step.
+  const detailParams = useMemo<NightParams>(
+    () => ({ ...params, sector: detailSector }),
+    [params, detailSector],
+  );
+  const detail = useDetail(solver, detailParams, activeId, Number(day.slice(0, 4)), outlookDays);
   const calendarDate = new Date(day + "T12:00:00");
   function pickDate(d: string) {
     if (
@@ -346,7 +365,9 @@ export default function Atlas({
             </div>
             <div className="results-heading">
               <span>
-                {rows.length} objects {mode === "night" ? "usable" : "listed"}
+                {solving
+                  ? "Computing\u2026"
+                  : `${rows.length} objects ${mode === "night" ? "usable" : "listed"}`}
               </span>
               <span>{mode === "night" ? "By suitability ↓" : "By catalogue"}</span>
             </div>
@@ -415,20 +436,20 @@ export default function Atlas({
             </div>
             <p className="catalog-footnote">
               The catalogues also include clusters: choose “All types” to browse them. C14 has two
-              components. Objects that never rise at your location are excluded only dai
-              suggerimenti notturni.
+              components. Objects that never rise at your location are left out of the nightly
+              suggestions only, not the catalogue.
             </p>
           </aside>
           <div id="object-detail">
             {current ? (
-              <ErrorBoundary area="The object panel" resetKey={current.o.id}>
+              <ErrorBoundary area="The object panel" resetKey={current.id}>
                 <ObjectDetails
-                  key={current.o.id}
-                  r={current}
+                  key={current.id}
+                  o={current}
+                  detail={detail}
                   day={day}
                   minAlt={Number(minAlt)}
                   scope={scope}
-                  sector={detailSector}
                   site={site}
                   clouds={clouds}
                   outlook={outlook}

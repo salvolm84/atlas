@@ -81,6 +81,7 @@ pnpm exec tsc --noEmit    # TypeScript validation
 pnpm test:astronomy       # catalogue, dates, geometry and horizon regression checks
 pnpm test:ui              # location input, horizon dial keyboard and ARIA
 pnpm test:pwa             # manifest, icons and service-worker routing
+pnpm test:solver          # worker and main-thread fallback agree
 pnpm build:portable       # generate directly openable HTML in release-runtime/
 python3 scripts/package-release.py  # create versioned ZIP and SHA-256 checksums
 ```
@@ -101,6 +102,7 @@ The existing `pnpm build` / `pnpm start` scripts target the original hosted Work
 | `app/choice.tsx` | Shared labelled `Select` used by the controls |
 | `app/site-picker.tsx` | Observing-location picker: geolocation and manual coordinates |
 | `lib/weather.ts` | Cloud forecast fetching, summarising and the coming-nights outlook |
+| `lib/solver*.ts`, `lib/sky-worker.ts` | Runs the night sweep in a worker, with a main-thread fallback |
 | `public/manifest.webmanifest`, `public/sw.js` | Installable-app manifest and service worker (hosted only) |
 | `app/horizon.tsx` | Circular horizon selector and direction-by-time table |
 | `lib/sky.ts` | Astronomy, the `Site` type, telescope specifications and scoring |

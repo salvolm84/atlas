@@ -57,6 +57,9 @@ jobs:
       - name: Installable-app checks
         run: pnpm test:pwa
 
+      - name: Off-thread solver checks
+        run: pnpm test:solver
+
       # The artifact people actually download. Must build on every change.
       - name: Portable release build
         run: pnpm build:portable
