@@ -31,5 +31,14 @@
     ".next/dev/types/**/*.ts",
     "**/*.mts"
   ],
-  "exclude": ["node_modules", "examples"]
+  "exclude": [
+    "node_modules",
+    "examples",
+    "dist",
+    ".vinext",
+    ".wrangler",
+    ".sites-runtime",
+    "release-runtime",
+    "release-assets"
+  ]
 }
