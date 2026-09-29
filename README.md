@@ -8,9 +8,9 @@ Choose a night, select your telescope and mark the part of the sky you can see. 
 
 ## Run it without installing anything
 
-1. Open this repository’s **Releases** page and download `atlas-v1.1.0-ready-to-run.zip` (about 3.4 MB).
+1. Open this repository’s **Releases** page and download `atlas-v1.2.0-ready-to-run.zip` (about 3.4 MB).
 2. Extract the **entire** archive.
-3. Open `atlas-v1.1.0/index.html` in a modern desktop browser.
+3. Open `atlas-v1.2.0/index.html` in a modern desktop browser.
 
 The release embeds its JavaScript, CSS and working catalogue. **No Node.js, package installation, account, API key or web server is needed to use it.** Keep the accompanying folders for source code, credits and downloadable catalogue files.
 
@@ -149,7 +149,7 @@ The Stellarium-derived catalogue is distributed under **GPL-2.0-or-later**, with
 
 ## Versioning and releases
 
-The current release is **v1.1.0**. Release contents:
+The current release is **v1.2.0**. Release contents:
 
 - `atlas-v<version>-ready-to-run.zip`: inline HTML application, data, notices, quick-start instructions and complete corresponding source.
 - `SHA256SUMS.txt`: SHA-256 checksum for the ZIP.

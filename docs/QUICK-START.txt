@@ -1,8 +1,9 @@
-DEEP SKY ATLAS — v1.1.0
+DEEP SKY ATLAS — v1.2.0
 
 1. Extract the entire ZIP into a folder.
 2. Double-click index.html and open it in a modern desktop browser.
 3. Choose your night, telescope, altitude threshold and visible horizon sector.
+4. Click the location in the header to observe from somewhere other than Modena.
 
 No installation, Node.js, account, API key or local web server is needed to run
 this release. Keep the data and third-party-licenses folders next to the HTML.
@@ -12,7 +13,17 @@ DSS2 survey photographs and the morphology gallery require internet. Their
 availability depends on the external providers. The field-of-view geometry
 remains usable when the survey image cannot load.
 
-The observing location is Modena, Italy.
+The observing location defaults to Modena, Italy. Click it in the header to
+enter a latitude, longitude, elevation and time zone, or to use your browser's
+current position. All displayed times follow the selected site's time zone.
+Nothing is saved: reopening the page returns to Modena.
+
+Browsers usually refuse location access for pages opened straight from a file.
+If "Use my current location" does not work here, type the coordinates instead.
+
+The horizon dial takes the keyboard: focus a handle and use the arrow keys, or
+Page Up and Page Down to jump a whole compass point.
+
 Use morfologia.html for the galaxy morphology guide.
 
 To modify the app, use the source repository (or the source archive), not the
