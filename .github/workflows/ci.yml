@@ -54,6 +54,9 @@ jobs:
       - name: Interface interaction checks
         run: pnpm test:ui
 
+      - name: Installable-app checks
+        run: pnpm test:pwa
+
       # The artifact people actually download. Must build on every change.
       - name: Portable release build
         run: pnpm build:portable

@@ -23,7 +23,17 @@ The release also contains `morfologia.html`, the galaxy morphology guide, and `s
 | Cardinal directions and horizon filtering | SIMBAD, NASA, ZWO and other source links |
 | Monthly seasonality and FOV geometry | Downloading dependencies for development |
 
-Mobile operating systems may preview downloaded HTML instead of executing it. For mobile use, open the hosted app or serve the extracted folder with a static web server. The desktop release is a website, not a signed native application or an installer.
+Mobile operating systems may preview downloaded HTML instead of executing it, so the ZIP is a desktop artifact. **For phones and tablets, use the hosted app**, which can be installed to the home screen and works offline after the first visit. The ZIP is a website, not a signed native application or an installer.
+
+### Install the hosted app
+
+Served over HTTPS, the atlas is a progressive web app: a manifest plus a service worker that caches the application shell and its build assets. Add it to your home screen from the browser menu and it opens standalone, offline, with the full catalogue — the catalogue and all astronomical calculations are compiled into the bundle, so nothing is fetched to plan a night.
+
+Two things still need the network, and say so when they are missing: the DSS2 survey images and the cloud forecast.
+
+The service worker is deliberately careful. Navigations go to the network first, so an online reader never sees a stale app; only content-hashed build assets are cached indefinitely; nothing cross-origin is intercepted, so a forecast is never served from a stale cache; and it does not call `skipWaiting`, which would delete assets from under a page that is still running.
+
+None of this applies to the portable ZIP. Service workers require an `http(s)` origin, so the `file://` release neither ships nor registers one.
 
 ## What is included
 
@@ -70,6 +80,7 @@ pnpm lint                 # ESLint
 pnpm exec tsc --noEmit    # TypeScript validation
 pnpm test:astronomy       # catalogue, dates, geometry and horizon regression checks
 pnpm test:ui              # location input, horizon dial keyboard and ARIA
+pnpm test:pwa             # manifest, icons and service-worker routing
 pnpm build:portable       # generate directly openable HTML in release-runtime/
 python3 scripts/package-release.py  # create versioned ZIP and SHA-256 checksums
 ```
@@ -90,6 +101,7 @@ The existing `pnpm build` / `pnpm start` scripts target the original hosted Work
 | `app/choice.tsx` | Shared labelled `Select` used by the controls |
 | `app/site-picker.tsx` | Observing-location picker: geolocation and manual coordinates |
 | `lib/weather.ts` | Cloud forecast fetching, summarising and the coming-nights outlook |
+| `public/manifest.webmanifest`, `public/sw.js` | Installable-app manifest and service worker (hosted only) |
 | `app/horizon.tsx` | Circular horizon selector and direction-by-time table |
 | `lib/sky.ts` | Astronomy, the `Site` type, telescope specifications and scoring |
 | `lib/framing.ts` | Frame-fit geometry, independent of React |

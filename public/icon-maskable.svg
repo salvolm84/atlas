@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- Maskable: full-bleed background, artwork inside the 80% safe zone, since
+       the platform crops this to a circle or squircle of its choosing. -->
+  <rect width="64" height="64" fill="#050914"/>
+  <g transform="translate(32 32) scale(0.62) translate(-32 -32)">
+    <ellipse cx="32" cy="32" rx="23" ry="9" fill="none" stroke="#78e5ff" stroke-width="4" transform="rotate(-22 32 32)"/>
+    <circle cx="32" cy="32" r="7" fill="#9d8cff"/>
+    <circle cx="52" cy="20" r="2.5" fill="#fff"/>
+  </g>
+</svg>
