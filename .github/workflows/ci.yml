@@ -141,6 +141,6 @@ jobs:
             gh release upload "${GITHUB_REF_NAME}" "${assets[@]}" --clobber
           else
             gh release create "${GITHUB_REF_NAME}" "${assets[@]}" \
-              --title "Atlante Deep Sky ${GITHUB_REF_NAME}" \
+              --title "Deep Sky Atlas ${GITHUB_REF_NAME}" \
               --verify-tag "${notes_args[@]}"
           fi
