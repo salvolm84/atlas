@@ -1,14 +1,16 @@
 # Atlante Deep Sky · Modena
 
+[![CI](https://github.com/salvolm84/atlas/actions/workflows/ci.yml/badge.svg)](https://github.com/salvolm84/atlas/actions/workflows/ci.yml)
+
 An Italian-language deep-sky atlas and astrophotography planner for **Modena, Italy**, with **248 catalogue entries**, Seestar field-of-view overlays and a circular horizon filter.
 
 Choose a night, select your telescope and mark the part of the sky you can see. The atlas ranks targets using darkness, altitude, available observing time, Moon conditions and apparent size.
 
 ## Run it without installing anything
 
-1. Open this repository’s **Releases** page and download `atlas-v1.0.0-ready-to-run.zip`.
+1. Open this repository’s **Releases** page and download `atlas-v1.1.0-ready-to-run.zip` (about 3.4 MB).
 2. Extract the **entire** archive.
-3. Open `atlas-v1.0.0/index.html` in a modern desktop browser.
+3. Open `atlas-v1.1.0/index.html` in a modern desktop browser.
 
 The release embeds its JavaScript, CSS and working catalogue. **No Node.js, package installation, account, API key or web server is needed to use it.** Keep the accompanying folders for source code, credits and downloadable catalogue files.
 
@@ -62,11 +64,18 @@ Open **http://localhost:5173**. Leave the terminal running; stop with `Ctrl+C`. 
 ### Useful commands
 
 ```sh
-pnpm test:astronomy        # catalogue, dates, geometry and horizon regression checks
+pnpm format               # apply Prettier
+pnpm format:check         # verify formatting without writing
+pnpm lint                 # ESLint
 pnpm exec tsc --noEmit    # TypeScript validation
+pnpm test:astronomy       # catalogue, dates, geometry and horizon regression checks
 pnpm build:portable       # generate directly openable HTML in release-runtime/
 python3 scripts/package-release.py  # create versioned ZIP and SHA-256 checksums
 ```
+
+GitHub Actions runs all of the above except packaging, on Node 22.13.0 and 24, and additionally regenerates `public/data/catalog.json` from the bundled Stellarium TSV to prove the catalogue is still derivable from its declared source. See `.github/workflows/ci.yml`.
+
+`components/ui` holds only the eight shadcn components the atlas renders. Add more with `pnpm dlx shadcn@latest add <name>`; `components.json` keeps the registry configuration.
 
 The existing `pnpm build` / `pnpm start` scripts target the original hosted Worker application. **Use `build:portable` for the standalone release.**
 
@@ -74,9 +83,14 @@ The existing `pnpm build` / `pnpm start` scripts target the original hosted Work
 
 | File | Purpose |
 | --- | --- |
-| `app/atlas.tsx` | Atlas interface, filters, object details and FOV overlay |
+| `app/atlas.tsx` | Application shell: header, night controls, catalogue list, method section |
+| `app/object-details.tsx` | Selected object panel: facts, night window and seasonality charts |
+| `app/fov-view.tsx` | Seestar field-of-view simulator over the survey image |
+| `app/choice.tsx` | Shared labelled `Select` used by the controls |
 | `app/horizon.tsx` | Circular horizon selector and direction-by-time table |
 | `lib/sky.ts` | Astronomy, Modena observer, telescope specifications and scoring |
+| `lib/framing.ts` | Frame-fit geometry, independent of React |
+| `components/error-boundary.tsx` | Keeps a render failure from blanking the offline page |
 | `app/globals.css` | Shared visual styles and responsive layouts |
 | `app/morfologia/page.tsx` | Galaxy morphology guide |
 | `public/data/catalog.json` | Curated, translated catalogue entries |
@@ -86,7 +100,7 @@ The existing `pnpm build` / `pnpm start` scripts target the original hosted Work
 | `scripts/package-release.py` | Archive runtime plus corresponding editable source |
 | `scripts/verify-sky.cjs` | Astronomical and horizon regression checks |
 
-Changing the observing location requires updating the observer **and** the Modena-specific labels and latitude-based visibility checks. This version has no location selector. UI selections are not persisted between sessions.
+This version has no location selector. Latitude-dependent visibility now derives from `observer` through `transitAltitude` and `neverRises` in `lib/sky.ts`, so changing the observing location means editing `observer`, the `Europe/Rome` time zone used by `localTime`, `clock` and `romeDate`, and the Modena labels in the interface. UI selections are not persisted between sessions.
 
 ### Rebuild the catalogue
 
@@ -131,10 +145,12 @@ The Stellarium-derived catalogue is distributed under **GPL-2.0-or-later**, with
 
 ## Versioning and releases
 
-The initial release is **v1.0.0**. Release contents:
+The current release is **v1.1.0**. Release contents:
 
-- `atlas-v1.0.0-ready-to-run.zip`: inline HTML application, data, notices, quick-start instructions and complete corresponding source.
+- `atlas-v<version>-ready-to-run.zip`: inline HTML application, data, notices, quick-start instructions and complete corresponding source.
 - `SHA256SUMS.txt`: SHA-256 checksum for the ZIP.
 - GitHub’s automatically generated source archives for the tagged revision.
 
-For future releases: update `package.json` and release notes, commit the changes, run validation and `build:portable`, then package. Tag that exact commit and attach the generated ZIP and checksums. Do not publish secrets, `node_modules`, local environment files or machine-specific runtime state.
+Inside the archive, `data/` carries `catalog.json`, the provenance notice, the Stellarium licence and the generation script. The 11.7 MB source TSV lives once, under `source/public/data/`, where it is the corresponding source for the GPL catalogue; it is not read at runtime, since `catalog.json` is compiled into the bundle.
+
+To cut a release: update `version` in `package.json`, add `docs/RELEASE-v<version>.md`, commit, then tag that exact commit `v<version>` and push the tag. The `release` job in CI verifies the tag matches `package.json`, runs `build:portable` and `package-release.py`, and publishes the ZIP and checksums using the release notes file. Do not publish secrets, `node_modules`, local environment files or machine-specific runtime state.
