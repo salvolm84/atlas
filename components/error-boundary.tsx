@@ -49,9 +49,8 @@ export class ErrorBoundary extends Component<Props, State> {
           <Orbit size={28} />
           <h3>{this.props.area ?? "Questa sezione"} non è disponibile</h3>
           <p>
-            Si è verificato un errore inatteso durante la visualizzazione. Il resto
-            dell’atlante resta utilizzabile: prova a scegliere un altro oggetto o a
-            ricaricare la pagina.
+            Si è verificato un errore inatteso durante la visualizzazione. Il resto dell’atlante
+            resta utilizzabile: prova a scegliere un altro oggetto o a ricaricare la pagina.
           </p>
           <div className="notice warning">{error.message || "Errore sconosciuto"}</div>
           <button onClick={this.reset}>Riprova</button>

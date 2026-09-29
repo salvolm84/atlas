@@ -1,0 +1,41 @@
+# Dependencies, tool state and generated output
+node_modules/
+dist/
+.next/
+.vinext/
+.wrangler/
+.sites-runtime/
+release-runtime/
+release-assets/
+drizzle/
+
+# Vendored verbatim from the shadcn registry (see eslint.config.mjs) and from
+# Tailwind. Keep these byte-identical so a future registry bump stays a clean
+# diff instead of a reformat fight.
+components/ui/
+hooks/use-mobile.ts
+vendor/
+build/sites-vite-plugin.ts
+
+# Opt-in template material, already excluded from tsconfig.
+examples/
+
+# Sites platform scaffolding rather than this project's code. Left untouched
+# for the same reason as components/ui: so a template update stays a clean
+# diff. The project's own scripts (build-portable, verify-sky, build-catalog,
+# package-release) are formatted.
+scripts/pnpm-install.mjs
+scripts/install-ci.mjs
+scripts/run-framework.mjs
+scripts/execution-profile.mjs
+scripts/sites-env.mjs
+
+# Data, lockfiles and third-party notices
+public/data/
+pnpm-lock.yaml
+
+# Hand-written prose, and a 20 KB stylesheet whose reflow deserves its own
+# decision rather than a drive-by reformat.
+*.md
+*.txt
+app/globals.css

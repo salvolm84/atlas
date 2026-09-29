@@ -20,8 +20,8 @@ export default function Error({
           <Orbit size={28} />
           <h3>L’atlante non è disponibile</h3>
           <p>
-            Si è verificato un errore inatteso durante il caricamento della pagina.
-            Riprova; se l’errore persiste, ricarica il browser.
+            Si è verificato un errore inatteso durante il caricamento della pagina. Riprova; se
+            l’errore persiste, ricarica il browser.
           </p>
           <div className="notice warning">
             {error.message || "Errore sconosciuto"}
