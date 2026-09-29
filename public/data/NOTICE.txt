@@ -1,0 +1,34 @@
+Atlante Deep Sky — data provenance
+
+Stellarium DSO catalog version 3.23 standard:
+https://github.com/Stellarium/stellarium/blob/master/nebulae/default/catalog.txt
+Copyright Stellarium contributors. Distributed under GNU GPL version 2 or later,
+following the Stellarium repository license. See COPYING-Stellarium.txt.
+The unmodified source TSV is included as stellarium-catalog-source.tsv.
+The derived selection, Italian labels and unit conversions in catalog.json are
+also provided under GPL-2.0-or-later. Transformation source: build-catalog.py.
+Coordinates and morphology are retained from the source; distances in kpc are
+converted to light-years (1 kpc = 3261.56 light-years). Unknown values are null.
+Selection: all Messier and Caldwell entries, plus named NGC/IC/Sh2/Barnard targets.
+Caldwell 14 has two component records; catalogue numbers must not be counted
+as one number per row.
+
+Distance supplements (NASA/Hubble):
+M65: 35 million light-years
+https://science.nasa.gov/mission/hubble/science/explore-the-night-sky/hubble-messier-catalog/messier-65/
+C68: 400 light-years; reflection nebula
+https://science.nasa.gov/mission/hubble/science/explore-the-night-sky/hubble-caldwell-catalog/caldwell-68/
+
+Astronomy Engine 2.1.19, Don Cross, MIT license.
+https://github.com/cosinekitty/astronomy
+
+DSS2 photographs from STScI, accessed via CDS HiPS2FITS.
+This work makes use of hips2fits, a service provided by CDS.
+https://alasky.cds.unistra.fr/hips-image-services/hips2fits
+Survey images are externally served and are not synthetic Seestar photographs.
+
+Seestar hardware values from ZWO:
+https://www.seestar.com/products/seestar-s30-pro
+https://www.seestar.com/products/seestar-s50-pro-smart-telescope
+Read on 2026-09-16. Native main-camera sensor, 2160 x 3840 pixels, 2.9 um pitch.
+The frame is calculated geometrically and does not include processing crop.

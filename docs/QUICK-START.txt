@@ -1,0 +1,26 @@
+ATLANTE DEEP SKY — v1.0.0
+
+1. Extract the entire ZIP into a folder.
+2. Double-click index.html and open it in a modern desktop browser.
+3. Choose your night, telescope, altitude threshold and visible horizon sector.
+
+No installation, Node.js, account, API key or local web server is needed to run
+this release. Keep the data and third-party-licenses folders next to the HTML.
+
+Catalogue, astronomical calculations, calendar and horizon filtering are local.
+DSS2 survey photographs and the morphology gallery require internet. Their
+availability depends on the external providers. The field-of-view geometry
+remains usable when the survey image cannot load.
+
+The interface is in Italian and the observing location is Modena, Italy.
+Use morfologia.html for the galaxy morphology guide.
+
+To modify the app, use the source repository (or the source archive), not the
+generated HTML. See README.md in the source project for setup and build steps.
+
+On iOS/Android, opening downloaded HTML may be restricted by the OS or file
+previewer. Use the hosted app or serve this folder with a local static server.
+
+This is an observing planner, not a weather forecast or telescope controller.
+Times have 15-minute sampling; local obstructions and atmospheric conditions
+are not modelled. The FOV overlay is not a prediction of image quality.
