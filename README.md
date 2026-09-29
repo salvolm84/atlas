@@ -133,7 +133,7 @@ Review provenance and licensing before adding another data source. The generatio
 
 - Default observer: **44.6471° N, 10.9252° E, 34 m**, Modena; time zone `Europe/Rome`. Any other location can be entered at runtime, and all times follow that site's time zone.
 - Astronomy Engine precesses J2000 coordinates to the observing date. Sun and Moon use topocentric coordinates; horizon altitudes are geometric.
-- The night is sampled every **15 minutes**. Reported window boundaries are approximate to that cadence and may differ from a dedicated planner’s interpolated times.
+- The night is sampled every **15 minutes**, but each window boundary is then refined by bisection against the same usability test, so reported start and end times land within about 15 seconds of the true crossing. Useful hours are summed from those refined windows, so the total and the displayed times always agree. The altitude curve, the reported maximum altitude and its direction are still the 15-minute samples.
 - Darkness means **Sun below −18°**. Lunar illumination is evaluated at local midnight. The ranking also considers Moon presence and angular separation during useful samples.
 - Score 0–100 is a heuristic: 50% useful duration, 35% mean altitude factor, 15% integrated magnitude, followed by Moon and small-object penalties. It is **not** an SNR estimate or a guarantee of a successful photograph.
 - Seasonality samples the 15th of each month. “Best” months have at least 80% of the maximum monthly useful duration, with the same altitude/sector constraints and no lunar penalty.

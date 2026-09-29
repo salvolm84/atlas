@@ -464,9 +464,11 @@ export default function Atlas({
             </p>
             <p>
               J2000 coordinates precessed to the date with Astronomy Engine; Sun and Moon
-              topocentric, horizon altitudes geometric. Darkness means the Sun below −18°. Sampled
-              every 15 minutes, so times are accurate to roughly ±15 minutes. Times are shown in{" "}
-              {site.timeZone}, including daylight saving.
+              topocentric, horizon altitudes geometric. Darkness means the Sun below −18°. The night
+              is sampled every 15 minutes, but each window boundary is then bisected to the real
+              crossing, so the start and end times shown are good to about a quarter of a minute.
+              The altitude curve and the reported maximum are still the 15-minute samples. Times are
+              shown in {site.timeZone}, including daylight saving.
             </p>
           </div>
           <div>

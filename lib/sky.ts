@@ -207,6 +207,45 @@ export function separation(ra: number, dec: number, ra2: number, dec2: number) {
     ) / DEG
   );
 }
+const SAMPLE_MS = 15 * 60000;
+/** Bisection steps per edge: 15 min / 2^6 puts a boundary inside ~14 seconds. */
+const REFINE_STEPS = 6;
+
+/**
+ * Whether a target is usable at an arbitrary instant. Identical in form to the
+ * test applied to the 15-minute samples, so a refined boundary can never
+ * disagree with the sample it was refined from.
+ */
+function usableAt(
+  ms: number,
+  eq: { ra: number; dec: number },
+  observer: A.Observer,
+  minAlt: number,
+  sector: Sector,
+) {
+  const time = new Date(ms);
+  const sun = A.Equator(A.Body.Sun, time, observer, true, true);
+  if (A.Horizon(time, observer, sun.ra, sun.dec).altitude >= -18) return false;
+  const h = A.Horizon(time, observer, eq.ra, eq.dec);
+  return h.altitude >= minAlt && inSector(h.azimuth, sector);
+}
+
+/**
+ * The instant usability changes, bisected between a time where the target is
+ * not usable and one where it is. Returns the usable side, so a start edge is
+ * the first usable instant and an end edge the last.
+ */
+function refineEdge(notUsable: number, isUsable: number, test: (ms: number) => boolean) {
+  let bad = notUsable,
+    good = isUsable;
+  for (let i = 0; i < REFINE_STEPS; i++) {
+    const mid = (bad + good) / 2;
+    if (test(mid)) good = mid;
+    else bad = mid;
+  }
+  return good;
+}
+
 export type Sample = { ms: number; sun: number; moon: number; moonRA: number; moonDec: number };
 export type Night = {
   day: string;
@@ -311,18 +350,34 @@ export function targetNight(
   const usable = dark.filter((s) => s.usable);
   const candidates = usable.length ? usable : dark;
   const max = candidates.reduce((a, b) => (b.alt > a.alt ? b : a), candidates[0] ?? curve[0]);
-  const windows: { start: number; end: number }[] = [];
-  for (const s of usable) {
-    const last = windows.at(-1);
-    if (last && s.ms - last.end <= 1000) last.end = s.ms + 15 * 60000;
-    else windows.push({ start: s.ms, end: s.ms + 15 * 60000 });
-  }
+  // Contiguous runs of usable samples first, then each run's two edges are
+  // bisected against the neighbouring unusable sample. Reported boundaries are
+  // therefore the real crossing times rather than multiples of 15 minutes.
+  const runs: { first: number; last: number }[] = [];
+  curve.forEach((s, i) => {
+    if (!s.usable) return;
+    const open = runs.at(-1);
+    if (open && open.last === i - 1) open.last = i;
+    else runs.push({ first: i, last: i });
+  });
+  const test = (ms: number) => usableAt(ms, eq, observer, minAlt, sector);
+  const windows = runs.map(({ first, last }) => ({
+    // A run touching the edge of the sampled night cannot be bisected outwards;
+    // the night's own bounds are the honest answer there.
+    start: first === 0 ? curve[0].ms : refineEdge(curve[first - 1].ms, curve[first].ms, test),
+    end:
+      last === curve.length - 1
+        ? curve[last].ms + SAMPLE_MS
+        : refineEdge(curve[last + 1].ms, curve[last].ms, test),
+  }));
   const visibleMoon = usable.filter((s) => s.moon > 0);
   const moonSeparation = visibleMoon.length
     ? Math.min(...visibleMoon.map((s) => separation(eq.ra, eq.dec, s.moonRA, s.moonDec)))
     : null;
   const moonAbove = usable.length ? visibleMoon.length / usable.length : 0;
-  const hours = usable.length * 0.25;
+  // Derived from the refined windows, so the total and the displayed
+  // boundaries can never disagree, and both are better than 15-minute steps.
+  const hours = windows.reduce((total, w) => total + (w.end - w.start), 0) / 3600000;
   const avgAlt = usable.length
     ? usable.reduce((s, p) => s + Math.sin(p.alt * DEG), 0) / usable.length
     : 0;

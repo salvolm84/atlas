@@ -80,6 +80,44 @@ for (const o of s.objects.filter((o) => s.neverRises(o.dec, MODENA))) {
   assert.equal(s.targetNight(o, winter).score, 0, o.key);
 }
 
+// Interpolated window boundaries. The night is sampled every 15 minutes, but
+// a reported edge should be the real crossing, not a multiple of the cadence.
+{
+  const r = s.targetNight(m42, winter);
+  assert(r.windows.length > 0);
+  const SAMPLE = 15 * 60000;
+  const sampleTimes = new Set(winter.samples.map((x) => x.ms));
+  let interpolated = 0;
+  for (const w of r.windows) {
+    // An edge must lie strictly between the samples that bracket it, and the
+    // night's own start and end are the only legitimate round numbers.
+    const atNightStart = w.start === winter.samples[0].ms;
+    const atNightEnd = w.end === winter.samples.at(-1).ms + SAMPLE;
+    if (!atNightStart && !sampleTimes.has(w.start)) interpolated++;
+    if (!atNightEnd && !sampleTimes.has(w.end)) interpolated++;
+    // Each edge sits inside the 15-minute step it was refined from.
+    for (const edge of [w.start, w.end]) {
+      const nearest = winter.samples.reduce(
+        (best, x) => (Math.abs(x.ms - edge) < Math.abs(best - edge) ? x.ms : best),
+        winter.samples[0].ms,
+      );
+      assert(Math.abs(nearest - edge) <= SAMPLE, "an edge drifted beyond its sample interval");
+    }
+  }
+  assert(interpolated > 0, "M42's edges are altitude crossings and must be interpolated");
+
+  // The total follows the refined windows, so it is no longer a multiple of
+  // a quarter hour, and it must sit within a sample of the old estimate.
+  const sampled = r.curve.filter((p) => p.usable).length / 4;
+  assert(r.hours !== sampled, "interpolation should move the total off the sample grid");
+  assert(Math.abs(r.hours - sampled) <= 0.25 * r.windows.length);
+
+  // Refining must not invent observing time where there was none, nor lose a
+  // window entirely.
+  assert.equal(s.targetNight(m42, summer).windows.length, 0);
+  assert.equal(s.targetNight(m42, summer).hours, 0);
+}
+
 // Framing geometry moved to lib/framing.ts; check it still loads and agrees.
 const framing = load("../lib/framing.ts", { "./sky": s });
 const m31 = s.objects.find((o) => o.messier === 31);
@@ -133,11 +171,23 @@ for (const sector of [north, south, { start: 270, span: 180 }])
   for (const r of s.objects.map((o) => s.targetNight(o, winter, 30, "s50", sector))) {
     for (const p of r.curve.filter((p) => p.usable))
       assert(s.inSector(p.az, sector) && p.alt >= 30 && p.sun < -18);
-    assert.equal(r.hours, r.curve.filter((p) => p.usable).length / 4);
-    assert.equal(
-      r.hours,
-      r.windows.reduce((total, w) => total + (w.end - w.start) / 3600000, 0),
+    // Boundaries are interpolated, so the sample count only brackets the
+    // total: each edge can move by up to one sample interval.
+    const sampled = r.curve.filter((p) => p.usable).length / 4;
+    assert(
+      Math.abs(r.hours - sampled) <= 0.25 * Math.max(1, r.windows.length),
+      `${r.o.key}: ${r.hours} vs sampled ${sampled}`,
     );
+    assert.equal(r.hours > 0, sampled > 0, r.o.key);
+    // The total and the displayed boundaries must always agree exactly.
+    assert(
+      Math.abs(r.hours - r.windows.reduce((t, w) => t + (w.end - w.start) / 3600000, 0)) < 1e-9,
+      r.o.key,
+    );
+    for (const [i, w] of r.windows.entries()) {
+      assert(w.end > w.start, `${r.o.key}: empty window`);
+      if (i > 0) assert(r.windows[i - 1].end < w.start, `${r.o.key}: overlapping windows`);
+    }
   }
 // ---------------------------------------------------------------------------
 // A second site, in the other hemisphere and on the other side of the date and
@@ -197,7 +247,9 @@ assert(carinaSydney.reduce((t, m) => t + m.hours, 0) > 0);
 // Every object must stay internally consistent at the second site as well.
 for (const r of s.objects.map((o) => s.targetNight(o, sydneyWinter))) {
   assert(Number.isFinite(r.score) && r.score >= 0 && r.score <= 100, r.o.key);
-  assert.equal(r.hours, r.curve.filter((p) => p.usable).length / 4, r.o.key);
+  const sampled = r.curve.filter((p) => p.usable).length / 4;
+  assert(Math.abs(r.hours - sampled) <= 0.25 * Math.max(1, r.windows.length), r.o.key);
+  assert.equal(r.hours > 0, sampled > 0, r.o.key);
 }
 
 // A hand-entered site with the same id but different coordinates must not

@@ -311,7 +311,8 @@ export function ObjectDetails({
         <p className="caption">
           <span className="cyan">Object: cyan</span> ·{" "}
           <span className="lilac">Moon: dashed violet</span> · blue background: astronomical
-          darkness. Sampled every 15 minutes; times after midnight belong to the following day.
+          darkness. The curve is sampled every 15 minutes; the window boundaries above are
+          interpolated to the real crossing. Times after midnight belong to the following day.
           Minimum separation from the Moon within the useful window:{" "}
           <b>
             {r.moonSeparation === null ? "Moon absent / no window" : fmt(r.moonSeparation, 0) + "°"}

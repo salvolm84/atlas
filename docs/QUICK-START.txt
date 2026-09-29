@@ -32,9 +32,10 @@ generated HTML. See README.md in the source project for setup and build steps.
 On iOS/Android, opening downloaded HTML may be restricted by the OS or file
 previewer. Use the hosted app or serve this folder with a local static server.
 
-This is an observing planner, not a telescope controller. Times have 15-minute
-sampling; local obstructions are not modelled. The FOV overlay is not a
-prediction of image quality.
+This is an observing planner, not a telescope controller. Window start and end
+times are interpolated to the real crossing; the altitude curve and the peak
+are sampled every 15 minutes. Local obstructions are not modelled. The FOV
+overlay is not a prediction of image quality.
 
 Cloud cover is fetched from Open-Meteo (open-meteo.com, CC BY 4.0), drawn on
 the night chart, and summarised for the coming nights so you can see at a
