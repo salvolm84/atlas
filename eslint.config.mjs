@@ -12,7 +12,20 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Generated output. `release-assets/**` embeds a full copy of the source
+    // tree, so without this every finding is reported twice.
+    "dist/**",
+    ".vinext/**",
+    "release-runtime/**",
+    "release-assets/**",
+    ".sites-runtime/**",
   ]),
+  {
+    // Regression checks run on bare Node with no bundler, so they are
+    // deliberately CommonJS.
+    files: ["**/*.cjs"],
+    rules: { "@typescript-eslint/no-require-imports": "off" },
+  },
   {
     files: ["components/ui/**/*.{ts,tsx}", "hooks/use-mobile.ts"],
     rules: {

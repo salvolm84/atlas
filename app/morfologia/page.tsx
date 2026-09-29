@@ -110,6 +110,10 @@ export default function Home() {
 
         <div className="galaxy-stage" style={{ "--galaxy-accent": selected.accent } as CSSProperties}>
           <div className="relative min-h-[420px] overflow-hidden lg:min-h-[570px]">
+            {/* Photographs are hotlinked from ESA/NASA and the page also ships in
+                the portable `file://` release, where next/image has no optimizer
+                to call. A plain <img> is the correct element here. */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img key={selected.id} src={selected.image} alt={`${selected.example}, esempio di galassia ${selected.label.toLowerCase()}`} className="galaxy-image" />
             <div className="image-scrim" />
             <div className="absolute inset-x-0 top-0 flex items-start justify-between gap-4 p-5 sm:p-7">
@@ -147,7 +151,7 @@ export default function Home() {
           <div className="border-b border-white/10 px-5 py-10 sm:px-8 lg:border-b-0 lg:border-r lg:px-12 lg:py-14">
             <p className="eyebrow">Mappa evolutiva</p>
             <h2 className="mt-3 font-display text-3xl font-semibold tracking-tight sm:text-4xl">La sequenza di Hubble non è una timeline.</h2>
-            <p className="mt-4 max-w-lg leading-7 text-slate-400">Il celebre “diapason” ordina l'aspetto delle galassie, non la loro età. Le trasformazioni reali dipendono da gas, massa, ambiente, fusioni e formazione stellare.</p>
+            <p className="mt-4 max-w-lg leading-7 text-slate-400">Il celebre “diapason” ordina l’aspetto delle galassie, non la loro età. Le trasformazioni reali dipendono da gas, massa, ambiente, fusioni e formazione stellare.</p>
           </div>
           <div className="hubble-map px-5 py-10 sm:px-8 lg:px-12 lg:py-14" aria-label="Schema semplificato della classificazione di Hubble">
             <div className="hubble-node hubble-start"><strong>E0–E7</strong><span>Ellittiche</span></div><div className="hubble-fork" aria-hidden="true" />

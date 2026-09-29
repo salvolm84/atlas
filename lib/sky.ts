@@ -44,9 +44,6 @@ export function localTime(day:string,hour:number):Date {
  return new Date(guess);
 }
 export function nextDate(day:string) {const d=new Date(day+"T12:00:00Z");d.setUTCDate(d.getUTCDate()+1);return d.toISOString().slice(0,10);}
-function ofDate(o:DSO,time:Date) {
- return A.EquatorFromVector(A.RotateVector(A.Rotation_EQJ_EQD(time),A.VectorFromSphere(new A.Spherical(o.dec,o.ra,1),time)));
-}
 function bodyPosition(body:A.Body,time:Date) {
  const eq=A.Equator(body,time,observer,true,true);
  return {ra:eq.ra,dec:eq.dec,alt:A.Horizon(time,observer,eq.ra,eq.dec).altitude};

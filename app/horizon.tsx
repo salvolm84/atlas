@@ -4,15 +4,23 @@ import {Slider} from "@/components/ui/slider";
 import {bearing,cardinal,fmt,type Sector,type TargetNight,clock} from "@/lib/sky";
 
 const point=(a:number,r=76)=>({x:110+r*Math.sin(a*Math.PI/180),y:110-r*Math.cos(a*Math.PI/180)});
+// Tuple-typed so `start`/`span` stay numbers: the previous inline literal
+// widened to (string|number)[] and compared a string against sector.start.
+const PRESETS:[string,number,number][]=[["Tutto",0,360],["Nord",315,90],["Est",45,90],["Sud",135,90],["Ovest",225,90]];
 export function HorizonFilter({sector,onChange}:{sector:Sector;onChange:(s:Sector)=>void}) {
  const drag=useRef<"start"|"end"|null>(null);
  const a=point(sector.start),b=point(sector.start+sector.span),full=sector.span===360;
+ // Pointer and slider events fire far more often than the 5° snap actually
+ // changes. Re-emitting an equal sector would still be a new object identity,
+ // invalidating the night and seasonality memos for no visible difference.
+ const emit=(next:Sector)=>{if(next.start!==sector.start||next.span!==sector.span)onChange(next);};
  function move(e:PointerEvent<SVGSVGElement>) {
   if(!drag.current)return;
   const rect=e.currentTarget.getBoundingClientRect(),az=bearing(Math.atan2(e.clientX-rect.left-rect.width/2,-(e.clientY-rect.top-rect.height/2))*180/Math.PI);
   const snapped=bearing(Math.round(az/5)*5);
-  if(drag.current==="start")onChange({start:snapped,span:Math.max(5,bearing(sector.start+sector.span-snapped))});
-  else onChange({...sector,span:Math.max(5,bearing(snapped-sector.start))});
+  emit(drag.current==="start"
+   ?{start:snapped,span:Math.max(5,bearing(sector.start+sector.span-snapped))}
+   :{...sector,span:Math.max(5,bearing(snapped-sector.start))});
  }
  return <section className="horizon-filter" aria-label="Filtro di visibilità cardinale">
   <svg viewBox="0 0 220 220" className="horizon-dial" aria-label="Settore di orizzonte: trascina i due estremi, oppure usa i cursori" onPointerDown={e=>{
@@ -27,8 +35,8 @@ export function HorizonFilter({sector,onChange}:{sector:Sector;onChange:(s:Secto
   </svg>
   <div className="horizon-settings"><p className="eyebrow">Il tuo orizzonte · Modena</p><h3>{full?"Tutte le direzioni":`${cardinal(sector.start)} ${sector.start}° → ${cardinal(sector.start+sector.span)} ${bearing(sector.start+sector.span)}°`}</h3>
    <p className="caption">Seleziona il settore libero in senso orario, anche attraverso nord. Il filtro richiede almeno 30 minuti al buio, sopra la soglia di altezza e dentro il settore.</p>
-   <div className="horizon-sliders"><div><label>Inizio · {cardinal(sector.start)} {sector.start}°</label><Slider aria-label="Azimut iniziale" min={0} max={355} step={5} value={[sector.start]} onValueChange={v=>onChange({...sector,start:v[0]})}/></div><div><label>Ampiezza · {sector.span}°</label><Slider aria-label="Ampiezza del settore" min={5} max={360} step={5} value={[sector.span]} onValueChange={v=>onChange({...sector,span:v[0]})}/></div></div>
-   <div className="horizon-presets">{[["Tutto",0,360],["Nord",315,90],["Est",45,90],["Sud",135,90],["Ovest",225,90]].map(([label,start,span])=><button key={label} aria-pressed={sector.start===start&&sector.span===span} onClick={()=>onChange({start:Number(start),span:Number(span)})}>{label}</button>)}</div>
+   <div className="horizon-sliders"><div><label>Inizio · {cardinal(sector.start)} {sector.start}°</label><Slider aria-label="Azimut iniziale" min={0} max={355} step={5} value={[sector.start]} onValueChange={v=>emit({...sector,start:v[0]})}/></div><div><label>Ampiezza · {sector.span}°</label><Slider aria-label="Ampiezza del settore" min={5} max={360} step={5} value={[sector.span]} onValueChange={v=>emit({...sector,span:v[0]})}/></div></div>
+   <div className="horizon-presets">{PRESETS.map(([label,start,span])=><button key={label} aria-pressed={sector.start===start&&sector.span===span} onClick={()=>emit({start,span})}>{label}</button>)}</div>
    <p className="caption">Nord geografico 0° · Est 90° · Sud 180° · Ovest 270°. Ore, punteggi e mesi migliori si aggiornano con il settore.</p>
   </div>
  </section>;

@@ -1,0 +1,140 @@
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+    tags: ["v*"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref_type != 'tag' }}
+
+jobs:
+  verify:
+    name: Verify (Node ${{ matrix.node }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # 22.13.0 is the floor declared in package.json#engines; 24 is the
+        # current LTS. Both are exercised so neither can rot unnoticed.
+        node: ["22.13.0", "24"]
+    steps:
+      - uses: actions/checkout@v4
+
+      # No `version` input: the action reads packageManager from package.json,
+      # so pnpm stays pinned in exactly one place.
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm lint --max-warnings=0
+
+      - name: Typecheck
+        run: pnpm exec tsc --noEmit
+
+      - name: Astronomy and horizon regression checks
+        run: pnpm test:astronomy
+
+      # The artifact people actually download. Must build on every change.
+      - name: Portable release build
+        run: pnpm build:portable
+
+      # The hosted Worker path. Builds offline with no Cloudflare credentials.
+      - name: Hosted Worker build
+        run: pnpm build
+
+      - name: Upload portable release for inspection
+        if: matrix.node == '22.13.0'
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-runtime
+          path: release-runtime/
+          retention-days: 14
+
+  catalogue:
+    name: Catalogue reproducible from Stellarium source
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      # The catalogue is GPL-2.0-or-later and must stay derivable from the
+      # bundled TSV by the bundled script. If a hand edit ever lands in
+      # catalog.json, this regenerates it and the diff fails the build.
+      - name: Regenerate and compare
+        run: |
+          python3 scripts/build-catalog.py \
+            public/data/stellarium-catalog-source.tsv \
+            public/data/catalog.json
+          git diff --exit-code -- public/data/catalog.json
+
+  release:
+    name: Publish release assets
+    if: github.ref_type == 'tag'
+    needs: [verify, catalogue]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      # Fail before spending a build on a mistagged commit.
+      - name: Verify the tag matches package.json
+        run: |
+          version="$(node -p 'require("./package.json").version')"
+          if [ "v${version}" != "${GITHUB_REF_NAME}" ]; then
+            echo "Tag ${GITHUB_REF_NAME} does not match package.json version ${version}." >&2
+            exit 1
+          fi
+
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22.13.0"
+          cache: pnpm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build:portable
+
+      # package-release.py reads `git ls-files` to embed the complete
+      # corresponding source required by the catalogue's GPL licence.
+      - name: Package ZIP and checksums
+        run: python3 scripts/package-release.py
+
+      - name: Publish or update the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          notes="docs/RELEASE-${GITHUB_REF_NAME}.md"
+          if [ -f "${notes}" ]; then
+            notes_args=(--notes-file "${notes}")
+          else
+            notes_args=(--generate-notes)
+          fi
+          assets=(release-assets/*-ready-to-run.zip release-assets/SHA256SUMS.txt)
+          if gh release view "${GITHUB_REF_NAME}" >/dev/null 2>&1; then
+            gh release upload "${GITHUB_REF_NAME}" "${assets[@]}" --clobber
+          else
+            gh release create "${GITHUB_REF_NAME}" "${assets[@]}" \
+              --title "Atlante Deep Sky ${GITHUB_REF_NAME}" \
+              --verify-tag "${notes_args[@]}"
+          fi
