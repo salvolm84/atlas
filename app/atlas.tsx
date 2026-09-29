@@ -23,11 +23,13 @@ import {
   clock,
   fmt,
   makeNight,
+  MODENA,
   neverRises,
   objects,
   scopes,
   targetNight,
   type ScopeId,
+  type Site,
   type Sector,
 } from "@/lib/sky";
 import { Choice } from "./choice";
@@ -35,9 +37,11 @@ import { ObjectDetails } from "./object-details";
 export default function Atlas({
   initialDate,
   localMode = false,
+  site = MODENA,
 }: {
   initialDate: string;
   localMode?: boolean;
+  site?: Site;
 }) {
   const [sector, setSector] = useState<Sector>({ start: 0, span: 360 });
   const [day, setDay] = useState(initialDate),
@@ -49,7 +53,7 @@ export default function Atlas({
     [query, setQuery] = useState(""),
     [minAlt, setMinAlt] = useState("30");
   const [selected, setSelected] = useState(objects.find((o) => o.messier === 31)!.id);
-  const n = useMemo(() => makeNight(day), [day]);
+  const n = useMemo(() => makeNight(day, site), [day, site]);
   // Canonical sector identity: the memos below sweep 248 objects × 96 samples,
   // so they must not re-run when a caller hands back an equal-valued sector.
   const { start: sectorStart, span: sectorSpan } = sector;
@@ -245,7 +249,7 @@ export default function Atlas({
               <strong>{fmt(n.dark.length * 0.25)} h di buio</strong>
               <span>
                 {n.dark.length
-                  ? clock(n.dark[0].ms) + " – " + clock(n.dark.at(-1)!.ms + 15 * 60000)
+                  ? clock(n.dark[0].ms, site) + " – " + clock(n.dark.at(-1)!.ms + 15 * 60000, site)
                   : "Nessun buio astronomico"}
               </span>
             </div>
@@ -348,7 +352,7 @@ export default function Atlas({
                             fmt(r.peak, 0) +
                             "° max · " +
                             cardinal(r.peakAz)
-                          : neverRises(r.o.dec)
+                          : neverRises(r.o.dec, site)
                             ? "Non sorge da Modena"
                             : "Fuori finestra"}
                         {r.o.mag !== null ? " · mag " + fmt(r.o.mag, 1) : ""}
@@ -378,6 +382,7 @@ export default function Atlas({
                   minAlt={Number(minAlt)}
                   scope={scope}
                   sector={detailSector}
+                  site={site}
                 />
               </ErrorBoundary>
             ) : (

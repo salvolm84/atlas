@@ -24,16 +24,53 @@ export type DSO = {
   caldwell: number | null;
 };
 export const objects = raw as DSO[];
-export const observer = new A.Observer(44.6471, 10.9252, 34);
 
 /**
- * Highest altitude a declination can reach, at transit, from the observer's
- * latitude. Derived from `observer` so the latitude is stated in one place.
+ * An observing location. `timeZone` is an IANA name; every wall-clock time the
+ * planner shows is rendered in it, so it has to travel with the coordinates
+ * rather than being assumed. Elevation is in metres.
  */
-export const transitAltitude = (dec: number) => 90 - Math.abs(observer.latitude - dec);
+export type Site = {
+  id: string;
+  name: string;
+  latitude: number;
+  longitude: number;
+  height: number;
+  timeZone: string;
+};
 
-/** True when a declination never clears the observer's horizon. */
-export const neverRises = (dec: number) => transitAltitude(dec) <= 0;
+/** The original hardcoded location, kept as the default. */
+export const MODENA: Site = {
+  id: "modena",
+  name: "Modena, Italy",
+  latitude: 44.6471,
+  longitude: 10.9252,
+  height: 34,
+  timeZone: "Europe/Rome",
+};
+
+/**
+ * Identity of a site for caching. Derived from the values that change the sky,
+ * not from `id`, so a renamed or hand-entered site cannot collide with a preset.
+ */
+export const siteKey = (s: Site) => `${s.latitude},${s.longitude},${s.height},${s.timeZone}`;
+
+const observers = new Map<string, A.Observer>();
+export function observerFor(site: Site): A.Observer {
+  const key = siteKey(site);
+  let found = observers.get(key);
+  if (!found) {
+    found = new A.Observer(site.latitude, site.longitude, site.height);
+    observers.set(key, found);
+  }
+  return found;
+}
+
+/** Highest altitude a declination can reach, at transit, from this latitude. */
+export const transitAltitude = (dec: number, site: Site) => 90 - Math.abs(site.latitude - dec);
+
+/** True when a declination never clears this site's horizon. */
+export const neverRises = (dec: number, site: Site) => transitAltitude(dec, site) <= 0;
 export const MONTHS = [
   "Gen",
   "Feb",
@@ -94,28 +131,35 @@ export function distanceText(n: number | null) {
       ? fmt(n / 1e6, 2) + " milioni a.l."
       : fmt(n, 0) + " a.l.";
 }
-export function romeDate(d: Date) {
+
+/** Calendar date at the site, as YYYY-MM-DD. */
+export function siteDate(d: Date, site: Site) {
   return new Intl.DateTimeFormat("en-CA", {
-    timeZone: "Europe/Rome",
+    timeZone: site.timeZone,
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
   }).format(d);
 }
-export function clock(ms: number) {
+export function clock(ms: number, site: Site) {
   return new Intl.DateTimeFormat("it-IT", {
-    timeZone: "Europe/Rome",
+    timeZone: site.timeZone,
     hour: "2-digit",
     minute: "2-digit",
   }).format(ms);
 }
-export function localTime(day: string, hour: number): Date {
+
+/**
+ * The instant at which the site's wall clock reads `day` at `hour`. Solved by
+ * iteration rather than an offset table, so daylight saving is handled by Intl.
+ */
+export function localTime(day: string, hour: number, site: Site): Date {
   const [y, m, d] = day.split("-").map(Number);
   const target = Date.UTC(y, m - 1, d, hour);
   let guess = target;
   for (let i = 0; i < 3; i++) {
     const parts = new Intl.DateTimeFormat("en-GB", {
-      timeZone: "Europe/Rome",
+      timeZone: site.timeZone,
       year: "numeric",
       month: "2-digit",
       day: "2-digit",
@@ -135,7 +179,7 @@ export function nextDate(day: string) {
   d.setUTCDate(d.getUTCDate() + 1);
   return d.toISOString().slice(0, 10);
 }
-function bodyPosition(body: A.Body, time: Date) {
+function bodyPosition(body: A.Body, time: Date, observer: A.Observer) {
   const eq = A.Equator(body, time, observer, true, true);
   return { ra: eq.ra, dec: eq.dec, alt: A.Horizon(time, observer, eq.ra, eq.dec).altitude };
 }
@@ -156,34 +200,40 @@ export function separation(ra: number, dec: number, ra2: number, dec2: number) {
 export type Sample = { ms: number; sun: number; moon: number; moonRA: number; moonDec: number };
 export type Night = {
   day: string;
+  site: Site;
   samples: Sample[];
   dark: Sample[];
   moonLight: number;
   rotation: A.RotationMatrix;
 };
 const nightCache = new Map<string, Night>();
-export function makeNight(day: string): Night {
-  const cached = nightCache.get(day);
+export function makeNight(day: string, site: Site): Night {
+  // Keyed on the site as well as the day: the same date at a different place is
+  // a different sky, and returning a cached one would be silently wrong.
+  const key = siteKey(site) + "|" + day;
+  const cached = nightCache.get(key);
   if (cached) return cached;
-  const start = localTime(day, 12).getTime(),
-    end = localTime(nextDate(day), 12).getTime();
+  const observer = observerFor(site);
+  const start = localTime(day, 12, site).getTime(),
+    end = localTime(nextDate(day), 12, site).getTime();
   const samples: Sample[] = [];
   for (let ms = start; ms < end; ms += 15 * 60000) {
     const d = new Date(ms),
-      sun = bodyPosition(A.Body.Sun, d),
-      moon = bodyPosition(A.Body.Moon, d);
+      sun = bodyPosition(A.Body.Sun, d, observer),
+      moon = bodyPosition(A.Body.Moon, d, observer);
     samples.push({ ms, sun: sun.alt, moon: moon.alt, moonRA: moon.ra, moonDec: moon.dec });
   }
-  const midnight = localTime(nextDate(day), 0);
+  const midnight = localTime(nextDate(day), 0, site);
   const n = {
     day,
+    site,
     samples,
     dark: samples.filter((s) => s.sun < -18),
     moonLight: A.Illumination(A.Body.Moon, midnight).phase_fraction,
     rotation: A.Rotation_EQJ_EQD(midnight),
   };
   if (nightCache.size > 32) nightCache.delete(nightCache.keys().next().value!);
-  nightCache.set(day, n);
+  nightCache.set(key, n);
   return n;
 }
 export type Sector = { start: number; span: number };
@@ -211,6 +261,9 @@ export function targetNight(
   scope: ScopeId = "s50",
   sector: Sector = { start: 0, span: 360 },
 ): TargetNight {
+  // The night carries its own site, so the caller cannot pair a sky with the
+  // wrong observer.
+  const observer = observerFor(n.site);
   const eq = A.EquatorFromVector(
     A.RotateVector(
       n.rotation,
@@ -282,11 +335,12 @@ export function targetNight(
 export function seasonal(
   o: DSO,
   year: number,
+  site: Site,
   minAlt = 30,
   sector: Sector = { start: 0, span: 360 },
 ) {
   return MONTHS.map((label, i) => {
-    const night = makeNight(year + "-" + String(i + 1).padStart(2, "0") + "-15");
+    const night = makeNight(year + "-" + String(i + 1).padStart(2, "0") + "-15", site);
     const result = targetNight(o, night, minAlt, "s50", sector);
     return { label, month: i, hours: result.hours, peak: result.peak };
   });

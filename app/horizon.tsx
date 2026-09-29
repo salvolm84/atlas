@@ -1,7 +1,7 @@
 "use client";
 import { useRef, type PointerEvent } from "react";
 import { Slider } from "@/components/ui/slider";
-import { bearing, cardinal, fmt, type Sector, type TargetNight, clock } from "@/lib/sky";
+import { bearing, cardinal, clock, fmt, type Sector, type Site, type TargetNight } from "@/lib/sky";
 
 const point = (a: number, r = 76) => ({
   x: 110 + r * Math.sin((a * Math.PI) / 180),
@@ -158,7 +158,7 @@ export function HorizonFilter({
     </section>
   );
 }
-export function DirectionDetails({ r }: { r: TargetNight }) {
+export function DirectionDetails({ r, site }: { r: TargetNight; site: Site }) {
   const points = r.curve.filter((p) => p.sun < -18 && p.alt >= 0);
   const samples = points.filter(
     (p, i) => i === 0 || i === points.length - 1 || new Date(p.ms).getUTCMinutes() === 0,
@@ -174,7 +174,7 @@ export function DirectionDetails({ r }: { r: TargetNight }) {
       </div>
       <p>
         {r.hours > 0
-          ? `Al massimo della finestra utile: ${cardinal(r.peakAz)} · azimut ${fmt(r.peakAz, 0)}°, altezza ${fmt(r.peak, 0)}° alle ${clock(r.peakTime)}.`
+          ? `Al massimo della finestra utile: ${cardinal(r.peakAz)} · azimut ${fmt(r.peakAz, 0)}°, altezza ${fmt(r.peak, 0)}° alle ${clock(r.peakTime, site)}.`
           : "Nessuna finestra utile con i filtri selezionati."}
       </p>
       <p className="caption">
@@ -196,7 +196,7 @@ export function DirectionDetails({ r }: { r: TargetNight }) {
             <tbody>
               {samples.map((p) => (
                 <tr key={p.ms} className={p.usable ? "direction-usable" : ""}>
-                  <td>{clock(p.ms)}</td>
+                  <td>{clock(p.ms, site)}</td>
                   <td>{cardinal(p.az)}</td>
                   <td>{fmt(p.az, 0)}°</td>
                   <td>{fmt(p.alt, 0)}°</td>

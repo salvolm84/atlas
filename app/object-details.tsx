@@ -25,6 +25,7 @@ import {
   seasonal,
   surfaceBrightness,
   transitAltitude,
+  type Site,
   type ScopeId,
   type Sector,
   type TargetNight,
@@ -36,22 +37,27 @@ export function ObjectDetails({
   minAlt,
   scope,
   sector,
+  site,
 }: {
   r: TargetNight;
   day: string;
   minAlt: number;
   scope: ScopeId;
   sector: Sector;
+  site: Site;
 }) {
   const o = r.o,
     year = Number(day.slice(0, 4));
-  const seasons = useMemo(() => seasonal(o, year, minAlt, sector), [o, year, minAlt, sector]),
+  const seasons = useMemo(
+      () => seasonal(o, year, site, minAlt, sector),
+      [o, year, site, minAlt, sector],
+    ),
     best = Math.max(...seasons.map((s) => s.hours));
   const bestMonths = seasons
     .filter((s) => best > 0 && s.hours >= best * 0.8)
     .map((s) => s.label)
     .join(" · ");
-  const maxPossible = transitAltitude(o.dec),
+  const maxPossible = transitAltitude(o.dec, site),
     sb = surfaceBrightness(o);
   const chart = r.curve
     .filter((p) => p.sun < 5)
@@ -87,7 +93,7 @@ export function ObjectDetails({
           <Stars size={17} />
           <span>
             {fmt(r.hours)} h utili sopra {minAlt}° · massimo utile {fmt(r.peak, 0)}° ·{" "}
-            {cardinal(r.peakAz)} {fmt(r.peakAz, 0)}° alle {clock(r.peakTime)}
+            {cardinal(r.peakAz)} {fmt(r.peakAz, 0)}° alle {clock(r.peakTime, site)}
           </span>
         </div>
       )}
@@ -128,7 +134,7 @@ export function ObjectDetails({
         più facile. La brillanza media deriva da magnitudine e area ellittica e dipende dalla banda;
         non è una luminosità intrinseca. Distanze e dimensioni sono stime di catalogo.
       </p>
-      <DirectionDetails r={r} />
+      <DirectionDetails r={r} site={site} />
       <ErrorBoundary area="Il simulatore di campo" resetKey={o.id + scope}>
         <FovView o={o} scope={scope} />
       </ErrorBoundary>
@@ -144,7 +150,7 @@ export function ObjectDetails({
           {r.windows.length ? (
             r.windows.map((w) => (
               <span key={w.start}>
-                {clock(w.start)} → {clock(w.end)}
+                {clock(w.start, site)} → {clock(w.end, site)}
               </span>
             ))
           ) : (
@@ -168,7 +174,7 @@ export function ObjectDetails({
               dataKey="ms"
               type="number"
               domain={["dataMin", "dataMax"]}
-              tickFormatter={(v) => clock(v)}
+              tickFormatter={(v) => clock(v, site)}
               minTickGap={50}
               tick={{ fontSize: 12 }}
             />
@@ -184,7 +190,7 @@ export function ObjectDetails({
             <ReferenceLine y={minAlt} stroke="#7f95ad" strokeDasharray="4 4" />
             <ReferenceLine y={0} stroke="#4b576a" />
             <ChartTooltip
-              labelFormatter={(v) => clock(Number(v))}
+              labelFormatter={(v) => clock(Number(v), site)}
               formatter={(v, n) => [fmt(Number(v)) + "°", n === "alt" ? o.key : "Luna"]}
               contentStyle={{ background: "#101a2c", border: "1px solid #334155", color: "white" }}
             />

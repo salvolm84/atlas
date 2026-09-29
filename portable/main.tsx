@@ -2,7 +2,7 @@ import React from "react";
 import { createRoot } from "react-dom/client";
 import Atlas from "../app/atlas";
 import Morphology from "../app/morfologia/page";
-import { romeDate } from "../lib/sky";
+import { MODENA, siteDate } from "../lib/sky";
 import { ErrorBoundary } from "../components/error-boundary";
 import "../app/globals.css";
 
@@ -45,7 +45,7 @@ createRoot(document.getElementById("root")!).render(
         <Morphology />
       </>
     ) : (
-      <Atlas initialDate={romeDate(new Date())} localMode />
+      <Atlas initialDate={siteDate(new Date(), MODENA)} localMode />
     )}
   </ErrorBoundary>,
 );
