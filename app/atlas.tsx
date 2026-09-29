@@ -15,7 +15,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
-import { it } from "date-fns/locale";
+import { enGB } from "date-fns/locale";
 import { HorizonFilter } from "./horizon";
 import { ErrorBoundary } from "@/components/error-boundary";
 import {
@@ -137,40 +137,47 @@ export default function Atlas({
             <Orbit />
           </span>
           <span>
-            Atlante <b>Deep Sky</b>
+            Deep Sky <b>Atlas</b>
           </span>
         </a>
         <nav>
           <a href={localMode ? "./morfologia.html" : "/morfologia"}>
-            Tipologie di galassie <ArrowUpRight size={14} />
+            Galaxy types <ArrowUpRight size={14} />
           </a>
-          <a href="#method">Metodo e fonti</a>
+          <a href="#method">Method and sources</a>
         </nav>
         <span className="location">
           <MapPin size={15} />
-          Modena, Italia <small>44,65° N · 10,93° E</small>
+          {site.name}{" "}
+          <small>
+            {fmt(Math.abs(site.latitude), 2)}° {site.latitude >= 0 ? "N" : "S"} ·{" "}
+            {fmt(Math.abs(site.longitude), 2)}° {site.longitude >= 0 ? "E" : "W"}
+          </small>
         </span>
       </header>
       <div className="atlas-workspace">
         <div className="atlas-intro">
           <div>
-            <p className="eyebrow">Il cielo, dalla tua prospettiva</p>
-            <h1>Cosa fotografiamo stanotte?</h1>
-            <p>248 schede · Messier 1–110 · Caldwell 1–109 · altri NGC, IC, Sharpless e Barnard.</p>
+            <p className="eyebrow">The sky, from where you stand</p>
+            <h1>What shall we photograph tonight?</h1>
+            <p>
+              248 entries · Messier 1–110 · Caldwell 1–109 · selected NGC, IC, Sharpless and
+              Barnard.
+            </p>
           </div>
           <span className="atlas-count">
             <b>110 + 109</b>
-            <span>cataloghi completi</span>
+            <span>complete catalogues</span>
           </span>
         </div>
-        <section className="planner-controls" aria-label="Impostazioni della notte">
+        <section className="planner-controls" aria-label="Night settings">
           <div>
-            <label>Notte che inizia il</label>
+            <label>Night beginning</label>
             <Popover open={dateOpen} onOpenChange={setDateOpen}>
               <PopoverTrigger asChild>
                 <button className="date-button">
                   <CalendarDays size={17} />
-                  {calendarDate.toLocaleDateString("it-IT", {
+                  {calendarDate.toLocaleDateString("en-GB", {
                     day: "numeric",
                     month: "long",
                     year: "numeric",
@@ -180,7 +187,7 @@ export default function Atlas({
               <PopoverContent align="start" className="w-auto p-3">
                 <Calendar
                   mode="single"
-                  locale={it}
+                  locale={enGB}
                   selected={calendarDate}
                   defaultMonth={calendarDate}
                   captionLayout="dropdown"
@@ -198,10 +205,10 @@ export default function Atlas({
                   }}
                 />
                 <label className="date-input-label">
-                  Oppure inserisci una data
+                  Or type a date
                   <Input
                     type="date"
-                    aria-label="Data della notte"
+                    aria-label="Date of the night"
                     min="2000-01-01"
                     max="2100-12-31"
                     value={day}
@@ -212,9 +219,9 @@ export default function Atlas({
             </Popover>
           </div>
           <div>
-            <label>Telescopio · camera principale</label>
+            <label>Telescope · main camera</label>
             <Choice
-              label="Telescopio"
+              label="Telescope"
               value={scope}
               onChange={(s) => setScope(s as ScopeId)}
               options={[
@@ -224,33 +231,33 @@ export default function Atlas({
             />
           </div>
           <div>
-            <label>Altezza minima</label>
+            <label>Minimum altitude</label>
             <Choice
-              label="Altezza minima"
+              label="Minimum altitude"
               value={minAlt}
               onChange={setMinAlt}
               options={[
-                ["20", "20° · orizzonte libero"],
-                ["30", "30° · consigliata"],
-                ["40", "40° · più selettiva"],
+                ["20", "20° · clear horizon"],
+                ["30", "30° · recommended"],
+                ["40", "40° · more selective"],
               ]}
             />
           </div>
           <div className="night-summary">
             <Moon size={21} />
             <div>
-              <strong>Luna {fmt(n.moonLight * 100, 0)}%</strong>
-              <span>illuminazione a mezzanotte</span>
+              <strong>Moon {fmt(n.moonLight * 100, 0)}%</strong>
+              <span>illumination at midnight</span>
             </div>
           </div>
           <div className="night-summary">
             <Stars size={21} />
             <div>
-              <strong>{fmt(n.dark.length * 0.25)} h di buio</strong>
+              <strong>{fmt(n.dark.length * 0.25)} h of darkness</strong>
               <span>
                 {n.dark.length
                   ? clock(n.dark[0].ms, site) + " – " + clock(n.dark.at(-1)!.ms + 15 * 60000, site)
-                  : "Nessun buio astronomico"}
+                  : "No astronomical darkness"}
               </span>
             </div>
           </div>
@@ -260,14 +267,14 @@ export default function Atlas({
           <aside className="catalog-panel">
             <Tabs value={mode} onValueChange={setMode}>
               <TabsList className="catalog-tabs">
-                <TabsTrigger value="night">Questa notte</TabsTrigger>
-                <TabsTrigger value="catalog">Tutto l’atlante</TabsTrigger>
+                <TabsTrigger value="night">Tonight</TabsTrigger>
+                <TabsTrigger value="catalog">Whole atlas</TabsTrigger>
               </TabsList>
             </Tabs>
             <div className="search-field">
               <Search size={17} />
               <Input
-                aria-label="Cerca un oggetto"
+                aria-label="Search for an object"
                 placeholder="M42, C20, Cuore…"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
@@ -279,10 +286,10 @@ export default function Atlas({
                 value={catalog}
                 onChange={setCatalog}
                 options={[
-                  ["all", "Tutti i cataloghi"],
+                  ["all", "All catalogues"],
                   ["M", "Messier"],
                   ["C", "Caldwell"],
-                  ["extra", "Altri NGC / IC / Sh2"],
+                  ["extra", "Other NGC / IC / Sh2"],
                 ]}
               />
               <Choice
@@ -290,27 +297,29 @@ export default function Atlas({
                 value={type}
                 onChange={setType}
                 options={[
-                  ["deep", "Nebulose e galassie"],
-                  ["nebula", "Nebulose"],
-                  ["galaxy", "Galassie"],
-                  ["cluster", "Ammassi"],
-                  ["other", "Altri oggetti"],
+                  ["deep", "Nebulae and galaxies"],
+                  ["nebula", "Nebulae"],
+                  ["galaxy", "Galaxies"],
+                  ["cluster", "Clusters"],
+                  ["other", "Other objects"],
                   ["all", "Tutte le tipologie"],
                 ]}
               />
             </div>
             <div className="results-heading">
               <span>
-                {rows.length} oggetti {mode === "night" ? "utili" : "in elenco"}
+                {rows.length} objects {mode === "night" ? "usable" : "listed"}
               </span>
-              <span>{mode === "night" ? "Per idoneità ↓" : "Per catalogo"}</span>
+              <span>{mode === "night" ? "By suitability ↓" : "By catalogue"}</span>
             </div>
-            <div className="object-list" aria-label="Elenco degli oggetti">
+            <div className="object-list" aria-label="Object list">
               {!rows.length ? (
                 <div className="empty-state">
                   <Orbit size={28} />
-                  <h3>Nessun oggetto corrisponde</h3>
-                  <p>Cambia settore o data, abbassa la soglia oppure ripristina tutto l’atlante.</p>
+                  <h3>No object matches</h3>
+                  <p>
+                    Change the sector or date, lower the threshold, or go back to the whole atlas.
+                  </p>
                   <button
                     onClick={() => {
                       setQuery("");
@@ -320,7 +329,7 @@ export default function Atlas({
                       setSector({ start: 0, span: 360 });
                     }}
                   >
-                    Mostra l’atlante
+                    Show the atlas
                   </button>
                 </div>
               ) : (
@@ -353,8 +362,8 @@ export default function Atlas({
                             "° max · " +
                             cardinal(r.peakAz)
                           : neverRises(r.o.dec, site)
-                            ? "Non sorge da Modena"
-                            : "Fuori finestra"}
+                            ? "Never rises here"
+                            : "Outside window"}
                         {r.o.mag !== null ? " · mag " + fmt(r.o.mag, 1) : ""}
                       </small>
                     </span>
@@ -367,14 +376,14 @@ export default function Atlas({
               )}
             </div>
             <p className="catalog-footnote">
-              I cataloghi comprendono anche ammassi: seleziona “Tutte le tipologie” per consultarli.
-              C14 ha due componenti. Gli oggetti australi non visibili da Modena sono esclusi solo
-              dai suggerimenti notturni.
+              The catalogues also include clusters: choose “All types” to browse them. C14 has two
+              components. Objects that never rise at your location are excluded only dai
+              suggerimenti notturni.
             </p>
           </aside>
           <div id="object-detail">
             {current ? (
-              <ErrorBoundary area="La scheda dell’oggetto" resetKey={current.o.id}>
+              <ErrorBoundary area="The object panel" resetKey={current.o.id}>
                 <ObjectDetails
                   key={current.o.id}
                   r={current}
@@ -387,42 +396,43 @@ export default function Atlas({
               </ErrorBoundary>
             ) : (
               <div className="object-panel">
-                <h2>Nessun oggetto nel settore selezionato</h2>
-                <p>Cambia settore, data o altri filtri per trovare una finestra utile.</p>
+                <h2>No object in the selected sector</h2>
+                <p>Change the sector, the date or the other filters to find a useful window.</p>
               </div>
             )}
           </div>
         </div>
         <section id="method" className="method-panel">
           <div>
-            <p className="eyebrow">Trasparenza dei calcoli</p>
+            <p className="eyebrow">How the numbers are made</p>
             <h2>Un piano astronomico, non una previsione meteo.</h2>
             <p>
-              Punteggio 0–100 euristico: 50% durata utile, 35% altezza media, 15% magnitudine;
-              penalità per Luna e oggetti piccoli rispetto al campionamento. Occorrono almeno 30
-              minuti di finestra. Non misura il rapporto segnale/rumore e non include nuvole,
-              seeing, ostacoli, umidità o inquinamento luminoso locale.
+              The 0–100 score is a heuristic: 50% useful duration, 35% mean altitude, 15% magnitude,
+              then penalties for the Moon and for objects small against the sampling. At least 30
+              minutes of window are required. It does not measure signal-to-noise, and it excludes
+              cloud, seeing, obstructions, humidity and local light pollution.
             </p>
             <p>
-              Coordinate J2000 precesse alla data con Astronomy Engine; Sole e Luna topocentrici,
-              orizzonte geometrico. Buio: Sole sotto −18°. Campionamento ogni 15 minuti, accuratezza
-              temporale indicativa ±15 minuti. Orari Europe/Rome con cambi di ora.
+              J2000 coordinates precessed to the date with Astronomy Engine; Sun and Moon
+              topocentric, horizon altitudes geometric. Darkness means the Sun below −18°. Sampled
+              every 15 minutes, so times are accurate to roughly ±15 minutes. Times are shown in{" "}
+              {site.timeZone}, including daylight saving.
             </p>
           </div>
           <div>
-            <h3>Strumenti e provenienza</h3>
+            <h3>Instruments and provenance</h3>
             <p>
               <a href={scopes[scope].source} target="_blank" rel="noreferrer">
-                {scopes[scope].name} · specifiche ZWO ↗
+                {scopes[scope].name} · ZWO specifications ↗
               </a>
               <br />
               {scopes[scope].aperture} mm · {scopes[scope].focal} mm · {scopes[scope].sensor}
               <br />
-              2160 × 3840 px · pixel 2,9 μm · singolo frame senza crop.
+              2160 × 3840 px · 2.9 μm pixels · a single frame, uncropped.
             </p>
             <p>
-              FOV = 2 atan(dimensione sensore / 2f). I 4,6° e 2,8° pubblicizzati sono
-              approssimativamente le diagonali, non larghezza × altezza.
+              FOV = 2 atan(sensor dimension / 2f). The advertised 4.6° and 2.8° are approximately
+              the diagonals, not width × height.
             </p>
             <div className="source-links">
               <a
@@ -442,20 +452,20 @@ export default function Atlas({
               >
                 CDS HiPS2FITS / DSS2
               </a>
-              <a href={localMode ? "./data/NOTICE.txt" : "/data/NOTICE.txt"}>Crediti e licenze</a>
-              <a href={localMode ? "./data/catalog.json" : "/data/catalog.json"}>
-                Dati dell’atlante
+              <a href={localMode ? "./data/NOTICE.txt" : "/data/NOTICE.txt"}>
+                Credits and licences
               </a>
+              <a href={localMode ? "./data/catalog.json" : "/data/catalog.json"}>Atlas data</a>
             </div>
             <p className="caption">
-              Dati selezionati e tradotti; valori mancanti indicati esplicitamente. M65 e C68:
-              distanza integrata da NASA/Hubble. Le stime possono differire fra fonti.
+              Curated catalogue data; missing values are stated explicitly. M65 and C68 take their
+              distance from NASA/Hubble. Estimates can differ between sources.
             </p>
           </div>
         </section>
       </div>
       <footer className="atlas-footer">
-        Atlante Deep Sky · Modena <span>Esplora, inquadra, scegli la notte.</span>
+        Deep Sky Atlas <span>Explore, frame, pick your night.</span>
       </footer>
     </main>
   );

@@ -10,11 +10,11 @@ const point = (a: number, r = 76) => ({
 // Tuple-typed so `start`/`span` stay numbers: the previous inline literal
 // widened to (string|number)[] and compared a string against sector.start.
 const PRESETS: [string, number, number][] = [
-  ["Tutto", 0, 360],
-  ["Nord", 315, 90],
-  ["Est", 45, 90],
-  ["Sud", 135, 90],
-  ["Ovest", 225, 90],
+  ["All", 0, 360],
+  ["North", 315, 90],
+  ["East", 45, 90],
+  ["South", 135, 90],
+  ["West", 225, 90],
 ];
 export function HorizonFilter({
   sector,
@@ -52,11 +52,11 @@ export function HorizonFilter({
     );
   }
   return (
-    <section className="horizon-filter" aria-label="Filtro di visibilità cardinale">
+    <section className="horizon-filter" aria-label="Cardinal visibility filter">
       <svg
         viewBox="0 0 220 220"
         className="horizon-dial"
-        aria-label="Settore di orizzonte: trascina i due estremi, oppure usa i cursori"
+        aria-label="Horizon sector: drag either end point, or use the sliders"
         onPointerDown={(e) => {
           const r = e.currentTarget.getBoundingClientRect(),
             x = ((e.clientX - r.left) / r.width) * 220,
@@ -99,27 +99,27 @@ export function HorizonFilter({
           {sector.span}°
         </text>
         <text x="110" y="127" textAnchor="middle" fill="#acbfd4" fontSize="12">
-          visibili
+          visible
         </text>
       </svg>
       <div className="horizon-settings">
-        <p className="eyebrow">Il tuo orizzonte · Modena</p>
+        <p className="eyebrow">Your horizon</p>
         <h3>
           {full
-            ? "Tutte le direzioni"
+            ? "All directions"
             : `${cardinal(sector.start)} ${sector.start}° → ${cardinal(sector.start + sector.span)} ${bearing(sector.start + sector.span)}°`}
         </h3>
         <p className="caption">
-          Seleziona il settore libero in senso orario, anche attraverso nord. Il filtro richiede
-          almeno 30 minuti al buio, sopra la soglia di altezza e dentro il settore.
+          Select the clear sector clockwise, crossing north if you need to. The filter requires at
+          least 30 minutes in darkness, above the altitude threshold and inside the sector.
         </p>
         <div className="horizon-sliders">
           <div>
             <label>
-              Inizio · {cardinal(sector.start)} {sector.start}°
+              Start · {cardinal(sector.start)} {sector.start}°
             </label>
             <Slider
-              aria-label="Azimut iniziale"
+              aria-label="Starting azimuth"
               min={0}
               max={355}
               step={5}
@@ -128,9 +128,9 @@ export function HorizonFilter({
             />
           </div>
           <div>
-            <label>Ampiezza · {sector.span}°</label>
+            <label>Width · {sector.span}°</label>
             <Slider
-              aria-label="Ampiezza del settore"
+              aria-label="Sector width"
               min={5}
               max={360}
               step={5}
@@ -151,8 +151,8 @@ export function HorizonFilter({
           ))}
         </div>
         <p className="caption">
-          Nord geografico 0° · Est 90° · Sud 180° · Ovest 270°. Ore, punteggi e mesi migliori si
-          aggiornano con il settore.
+          True north 0° · east 90° · south 180° · west 270°. Hours, scores and best months all
+          update with the sector.
         </p>
       </div>
     </section>
@@ -167,30 +167,30 @@ export function DirectionDetails({ r, site }: { r: TargetNight; site: Site }) {
     <section className="direction-details">
       <div className="section-heading">
         <div>
-          <p className="eyebrow">Dove guardare</p>
-          <h3>Direzione durante la notte</h3>
+          <p className="eyebrow">Where to look</p>
+          <h3>Direction through the night</h3>
         </div>
         <span className="tag">N · E · S · O</span>
       </div>
       <p>
         {r.hours > 0
-          ? `Al massimo della finestra utile: ${cardinal(r.peakAz)} · azimut ${fmt(r.peakAz, 0)}°, altezza ${fmt(r.peak, 0)}° alle ${clock(r.peakTime, site)}.`
-          : "Nessuna finestra utile con i filtri selezionati."}
+          ? `At the peak of the useful window: ${cardinal(r.peakAz)} · azimuth ${fmt(r.peakAz, 0)}°, altitude ${fmt(r.peak, 0)}° at ${clock(r.peakTime, site)}.`
+          : "No useful window with the selected filters."}
       </p>
       <p className="caption">
-        La direzione cambia con l’orario. Azimut misurato dal nord geografico in senso orario; non è
-        l’orientamento del sensore o il nord celeste della fotografia.
+        The direction changes through the night. Azimuth is measured clockwise from true north; it
+        is not the sensor orientation or celestial north in the photograph.
       </p>
       {samples.length ? (
         <div className="direction-table">
           <table>
             <thead>
               <tr>
-                <th>Ora locale</th>
-                <th>Direzione</th>
-                <th>Azimut</th>
-                <th>Altezza</th>
-                <th>Ripresa</th>
+                <th>Local time</th>
+                <th>Direction</th>
+                <th>Azimuth</th>
+                <th>Altitude</th>
+                <th>Imaging</th>
               </tr>
             </thead>
             <tbody>
@@ -200,14 +200,16 @@ export function DirectionDetails({ r, site }: { r: TargetNight; site: Site }) {
                   <td>{cardinal(p.az)}</td>
                   <td>{fmt(p.az, 0)}°</td>
                   <td>{fmt(p.alt, 0)}°</td>
-                  <td>{p.usable ? "Nel settore, sopra soglia" : "Fuori settore / sotto soglia"}</td>
+                  <td>
+                    {p.usable ? "In sector, above threshold" : "Outside sector / below threshold"}
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
       ) : (
-        <p className="caption">Oggetto sotto l’orizzonte durante il buio astronomico.</p>
+        <p className="caption">Object below the horizon throughout astronomical darkness.</p>
       )}
     </section>
   );

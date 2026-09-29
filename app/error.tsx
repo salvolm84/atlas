@@ -18,16 +18,16 @@ export default function Error({
       <div className="object-panel">
         <div className="empty-state">
           <Orbit size={28} />
-          <h3>L’atlante non è disponibile</h3>
+          <h3>The atlas is unavailable</h3>
           <p>
-            Si è verificato un errore inatteso durante il caricamento della pagina. Riprova; se
-            l’errore persiste, ricarica il browser.
+            Something went wrong while loading the page. Try again; if the error persists, reload
+            your browser.
           </p>
           <div className="notice warning">
-            {error.message || "Errore sconosciuto"}
+            {error.message || "Unknown error"}
             {error.digest ? ` (${error.digest})` : ""}
           </div>
-          <button onClick={reset}>Riprova</button>
+          <button onClick={reset}>Try again</button>
         </div>
       </div>
     </main>

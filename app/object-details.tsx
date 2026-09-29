@@ -76,63 +76,61 @@ export function ObjectDetails({
         </div>
         <div className="score">
           <strong>{r.score}</strong>
-          <span>/100 questa notte</span>
+          <span>/100 tonight</span>
         </div>
       </header>
       {maxPossible <= 0 ? (
         <div className="notice warning">
-          Non sorge mai da Modena: declinazione {fmt(o.dec, 1)}°. Rimane consultabile nell’atlante.
+          Never rises from {site.name}: declination {fmt(o.dec, 1)}°. Still browsable in the atlas.
         </div>
       ) : r.hours === 0 ? (
         <div className="notice warning">
-          Nessuna finestra con Sole sotto −18° e oggetto sopra {minAlt}° nel settore scelto, nella
-          notte selezionata.
+          No window with the Sun below −18° and the object above {minAlt}° inside the chosen sector,
+          on the selected night.
         </div>
       ) : (
         <div className="notice">
           <Stars size={17} />
           <span>
-            {fmt(r.hours)} h utili sopra {minAlt}° · massimo utile {fmt(r.peak, 0)}° ·{" "}
-            {cardinal(r.peakAz)} {fmt(r.peakAz, 0)}° alle {clock(r.peakTime, site)}
+            {fmt(r.hours)} useful h above {minAlt}° · useful peak {fmt(r.peak, 0)}° ·{" "}
+            {cardinal(r.peakAz)} {fmt(r.peakAz, 0)}° at {clock(r.peakTime, site)}
           </span>
         </div>
       )}
       <div className="facts-grid">
         <div>
-          <span>Distanza ≈</span>
+          <span>Distance ≈</span>
           <strong>{distanceText(o.distance)}</strong>
         </div>
         <div>
-          <span>Magnitudine apparente</span>
+          <span>Apparent magnitude</span>
+          <strong>{o.mag === null ? "Not available" : fmt(o.mag, 2) + " (" + o.band + ")"}</strong>
+        </div>
+        <div>
+          <span>Angular size</span>
           <strong>
-            {o.mag === null ? "Non disponibile" : fmt(o.mag, 2) + " (" + o.band + ")"}
+            {o.major ? fmt(o.major, 1) + "′ × " + fmt(o.minor, 1) + "′" : "Not available"}
           </strong>
         </div>
         <div>
-          <span>Dimensioni angolari</span>
-          <strong>
-            {o.major ? fmt(o.major, 1) + "′ × " + fmt(o.minor, 1) + "′" : "Non disponibili"}
-          </strong>
+          <span>Estimated mean surface brightness</span>
+          <strong>{sb ? fmt(sb, 1) + " mag/arcsec²" : "Not available"}</strong>
         </div>
         <div>
-          <span>Brillanza media stimata</span>
-          <strong>{sb ? fmt(sb, 1) + " mag/arcsec²" : "Non disponibile"}</strong>
-        </div>
-        <div>
-          <span>Coordinate J2000</span>
+          <span>J2000 coordinates</span>
           <strong>
             {fmt(o.ra / 15, 4)} h / {fmt(o.dec, 4)}°
           </strong>
         </div>
         <div>
-          <span>Morfologia / classe</span>
+          <span>Morphology / class</span>
           <strong>{o.morphology || o.kind}</strong>
         </div>
       </div>
       <p className="caption">
-        Magnitudine: valori più piccoli indicano più luce integrata, non necessariamente un soggetto
-        più facile. La brillanza media deriva da magnitudine e area ellittica e dipende dalla banda;
-        non è una luminosità intrinseca. Distanze e dimensioni sono stime di catalogo.
+        Magnitude: smaller values mean more integrated light, not necessarily an easier subject.
+        Mean surface brightness is derived from the magnitude and an elliptical area and depends on
+        the band; it is not an intrinsic luminosity. Distances and sizes are catalogue estimates.
       </p>
       <DirectionDetails r={r} site={site} />
       <ErrorBoundary area="Il simulatore di campo" resetKey={o.id + scope}>
@@ -142,7 +140,7 @@ export function ObjectDetails({
         <div className="section-heading">
           <div>
             <p className="eyebrow">Modena · Europe/Rome</p>
-            <h3>La finestra di questa notte</h3>
+            <h3>Tonight’s window</h3>
           </div>
           <span className="tag">Soglia {minAlt}°</span>
         </div>
@@ -154,13 +152,13 @@ export function ObjectDetails({
               </span>
             ))
           ) : (
-            <span>Nessuna finestra utile</span>
+            <span>No useful window</span>
           )}
         </div>
         <ChartContainer
           config={{
             alt: { label: o.key, color: "#78e5ff" },
-            moon: { label: "Luna", color: "#b09dfc" },
+            moon: { label: "Moon", color: "#b09dfc" },
           }}
           className="altitude-chart"
         >
@@ -191,7 +189,7 @@ export function ObjectDetails({
             <ReferenceLine y={0} stroke="#4b576a" />
             <ChartTooltip
               labelFormatter={(v) => clock(Number(v), site)}
-              formatter={(v, n) => [fmt(Number(v)) + "°", n === "alt" ? o.key : "Luna"]}
+              formatter={(v, n) => [fmt(Number(v)) + "°", n === "alt" ? o.key : "Moon"]}
               contentStyle={{ background: "#101a2c", border: "1px solid #334155", color: "white" }}
             />
             <Line
@@ -214,14 +212,12 @@ export function ObjectDetails({
           </LineChart>
         </ChartContainer>
         <p className="caption">
-          <span className="cyan">Oggetto: ciano</span> ·{" "}
-          <span className="lilac">Luna: viola tratteggiato</span> · fondo azzurro: buio astronomico.
-          Campioni ogni 15 minuti; dopo mezzanotte si intende il giorno successivo. Separazione
-          minima dalla Luna nella finestra utile:{" "}
+          <span className="cyan">Object: cyan</span> ·{" "}
+          <span className="lilac">Moon: dashed violet</span> · blue background: astronomical
+          darkness. Sampled every 15 minutes; times after midnight belong to the following day.
+          Minimum separation from the Moon within the useful window:{" "}
           <b>
-            {r.moonSeparation === null
-              ? "Luna assente / nessuna finestra"
-              : fmt(r.moonSeparation, 0) + "°"}
+            {r.moonSeparation === null ? "Moon absent / no window" : fmt(r.moonSeparation, 0) + "°"}
           </b>
           .
         </p>
@@ -229,18 +225,18 @@ export function ObjectDetails({
       <section className="season-detail">
         <div className="section-heading">
           <div>
-            <p className="eyebrow">Stagionalità {year}</p>
+            <p className="eyebrow">Seasonality {year}</p>
             <h3>
               {maxPossible <= 0
-                ? "Non osservabile da Modena"
+                ? "Not observable from " + site.name
                 : best > 0
-                  ? "Mesi migliori: " + bestMonths
-                  : "Nessuna finestra nel settore e sopra soglia"}
+                  ? "Best months: " + bestMonths
+                  : "No window inside the sector and above the threshold"}
             </h3>
           </div>
         </div>
         <ChartContainer
-          config={{ hours: { label: "Ore utili", color: "#78e5ff" } }}
+          config={{ hours: { label: "Useful hours", color: "#78e5ff" } }}
           className="season-chart"
         >
           <BarChart
@@ -251,32 +247,33 @@ export function ObjectDetails({
             <XAxis dataKey="label" interval={0} tick={{ fontSize: 12 }} />
             <YAxis tick={{ fontSize: 12 }} tickFormatter={(v) => v + "h"} />
             <ChartTooltip
-              formatter={(v) => [fmt(Number(v)) + " h", "Buio sopra soglia"]}
+              formatter={(v) => [fmt(Number(v)) + " h", "Darkness above threshold"]}
               contentStyle={{ background: "#101a2c", border: "1px solid #334155" }}
             />
             <Bar dataKey="hours" fill="#78e5ff" radius={[4, 4, 0, 0]} isAnimationActive={false} />
           </BarChart>
         </ChartContainer>
         <p className="caption">
-          Ore sopra {minAlt}° con Sole sotto −18°, nel settore scelto, calcolate il 15 di ogni mese
-          senza penalità lunare. “Migliori”: almeno l’80% del massimo annuo. Altezza massima teorica
-          al transito: {fmt(maxPossible, 0)}°; edifici e ostacoli locali non inclusi.
+          Hours above {minAlt}° with the Sun below −18°, inside the chosen sector, computed on the
+          15th of each month with no lunar penalty. “Best” means at least 80% of the annual maximum.
+          Theoretical peak altitude at transit: {fmt(maxPossible, 0)}°; local buildings and
+          obstructions are not included.
         </p>
       </section>
       <section className="advice">
-        <h3>Indicazioni di ripresa</h3>
+        <h3>Imaging notes</h3>
         <p>{photoAdvice(o)}</p>
         {o.major && (o.major * 60) / fov(scope).scale < 120 && (
           <p className="warning">
-            Soggetto piccolo: circa {fmt((o.major * 60) / fov(scope).scale, 0)} pixel sul lato
-            maggiore al campionamento nativo. Non aspettarti i dettagli delle immagini Hubble.
+            Small subject: roughly {fmt((o.major * 60) / fov(scope).scale, 0)} pixels along the
+            major axis at native sampling. Do not expect Hubble-level detail.
           </p>
         )}
       </section>
       <div className="object-sources">
-        <span>Fonte distanza: {o.distanceSource}</span>
+        <span>Distance source: {o.distanceSource}</span>
         <a href={o.distanceUrl} target="_blank" rel="noreferrer">
-          Dati originali <ArrowUpRight size={14} />
+          Original data <ArrowUpRight size={14} />
         </a>
         <a
           href={

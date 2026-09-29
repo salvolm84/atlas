@@ -39,143 +39,142 @@ type Galaxy = {
 const galaxies: Galaxy[] = [
   {
     id: "spirale",
-    label: "Spirale",
+    label: "Spiral",
     code: "SA",
-    example: "Galassia di Andromeda",
+    example: "Andromeda Galaxy",
     catalog: "M31 · SA(s)b",
     summary:
-      "Un disco rotante con rigonfiamento centrale e bracci ricchi di gas, polveri e giovani stelle blu. I bracci non sono strutture rigide: sono regioni di maggiore densità che attraversano il disco.",
-    clue: "Cerca bracci continui, nodi H II e bande di polvere attorno a un nucleo luminoso.",
+      "A rotating disc with a central bulge and arms rich in gas, dust and young blue stars. The arms are not rigid structures: they are regions of higher density passing through the disc.",
+    clue: "Look for continuous arms, H II knots and dust lanes around a bright nucleus.",
     image: "https://cdn.esahubble.org/archives/images/screen/opo9940b.jpg",
     source: "https://esahubble.org/images/opo9940b/",
-    credit: "ESA/Hubble · Tony e Daphne Hallas",
-    distance: "2,54 Mly",
-    magnitude: "3,44",
+    credit: "ESA/Hubble · Tony and Daphne Hallas",
+    distance: "2.54 Mly",
+    magnitude: "3.44",
     angular: "190′ × 60′",
-    stars: "Popolazioni giovani e antiche",
-    gas: "Abbondante nel disco",
+    stars: "Young and old populations",
+    gas: "Abundant in the disc",
     lens: "135–400 mm",
     integration: "2–6 h",
     filters: "RGB/OSC; UV/IR-cut",
-    processing: "Mosaico o inquadratura larga; proteggi il nucleo durante lo stretch.",
+    processing: "A mosaic or a wide framing; protect the core while stretching.",
     accent: "#73d7ff",
   },
   {
-    id: "barrata",
-    label: "Spirale barrata",
+    id: "barred",
+    label: "Barred spiral",
     code: "SB",
     example: "NGC 1365",
     catalog: "NGC 1365 · SB(s)b",
     summary:
-      "Una barra di stelle attraversa il nucleo e alimenta i bracci dalle proprie estremità. La barra redistribuisce momento angolare e può convogliare gas verso le regioni centrali.",
-    clue: "Individua la barra lineare, poi segui i due bracci che partono dalle sue estremità.",
+      "A bar of stars crosses the nucleus and feeds the arms from its own ends. The bar redistributes angular momentum and can funnel gas towards the central regions.",
+    clue: "Find the straight bar, then follow the two arms leaving its ends.",
     image: "https://cdn.eso.org/images/wallpaper5/eso1038a.jpg",
     source: "https://www.eso.org/public/images/eso1038a/",
-    credit: "ESO/P. Grosbøl · VLT/HAWK-I, infrarosso",
+    credit: "ESO/P. Grosbøl · VLT/HAWK-I, infrared",
     distance: "≈ 56 Mly",
-    magnitude: "10,3",
-    angular: "11,2′ × 6,2′",
-    stars: "Blu nei bracci, antiche nel bulge",
-    gas: "Canalizzato lungo la barra",
+    magnitude: "10.3",
+    angular: "11.2′ × 6.2′",
+    stars: "Blue in the arms, old in the bulge",
+    gas: "Channelled along the bar",
     lens: "800–1500 mm",
     integration: "6–12 h",
-    filters: "L-RGB o OSC; Hα opzionale",
-    processing: "Deconvoluzione moderata per separare barra, anello interno e bracci.",
+    filters: "L-RGB or OSC; Hα optional",
+    processing: "Moderate deconvolution to separate bar, inner ring and arms.",
     accent: "#9d8cff",
   },
   {
-    id: "ellittica",
-    label: "Ellittica",
+    id: "elliptical",
+    label: "Elliptical",
     code: "E",
     example: "Virgo A",
     catalog: "M87 · E0–E1 pec",
     summary:
-      "Un sistema dominato da stelle vecchie, con poco gas freddo e quasi nessuna struttura a spirale. La forma va da quasi sferica (E0) a molto allungata (E7).",
-    clue: "Profilo liscio e regolare, colore caldo, assenza di bracci e formazione stellare diffusa.",
+      "A system dominated by old stars, with little cold gas and almost no spiral structure. The shape runs from nearly spherical (E0) to strongly elongated (E7).",
+    clue: "A smooth, regular profile, warm colour, no arms and no widespread star formation.",
     image:
       "https://science.nasa.gov/wp-content/uploads/2023/04/m87-full_jpg-jpg.webp?format=png&w=4096",
     source:
       "https://science.nasa.gov/mission/hubble/science/explore-the-night-sky/hubble-messier-catalog/messier-87/",
-    credit: "NASA, ESA e Hubble Heritage Team",
+    credit: "NASA, ESA and the Hubble Heritage Team",
     distance: "≈ 54 Mly",
-    magnitude: "8,6",
-    angular: "7,2′ × 6,8′",
-    stars: "Prevalentemente antiche",
-    gas: "Poco gas freddo",
+    magnitude: "8.6",
+    angular: "7.2′ × 6.8′",
+    stars: "Predominantly old",
+    gas: "Little cold gas",
     lens: "800–1600 mm",
     integration: "4–10 h",
     filters: "L-RGB o OSC broadband",
-    processing:
-      "Stretch dolce per mantenere il gradiente dell'alone; il jet richiede alta risoluzione.",
+    processing: "A gentle stretch keeps the halo gradient; the jet needs high resolution.",
     accent: "#ffc879",
   },
   {
-    id: "lenticolare",
-    label: "Lenticolare",
+    id: "lenticular",
+    label: "Lenticular",
     code: "S0",
-    example: "Galassia Sombrero",
+    example: "Sombrero Galaxy",
     catalog: "M104 · SA(s)a / S0",
     summary:
-      "Una forma di transizione: possiede disco e bulge, ma non bracci ben sviluppati. M104 è un caso di confine, spesso descritta come spirale precoce con aspetto lenticolare.",
-    clue: "Cerca un bulge dominante, un disco regolare e una netta banda di polvere, ma bracci poco evidenti.",
+      "A transitional form: it has a disc and a bulge but no well-developed arms. M104 is a borderline case, often described as an early spiral with a lenticular appearance.",
+    clue: "Look for a dominant bulge, a regular disc and a sharp dust lane, but faint arms.",
     image: "https://cdn.esahubble.org/archives/images/wallpaper5/opo0328a.jpg",
     source: "https://esahubble.org/images/opo0328a/",
     credit: "NASA/ESA · Hubble Heritage Team",
     distance: "≈ 30 Mly",
-    magnitude: "8,0",
-    angular: "8,7′ × 3,5′",
-    stars: "Antiche nel grande bulge",
-    gas: "Limitato, polveri nel disco",
+    magnitude: "8.0",
+    angular: "8.7′ × 3.5′",
+    stars: "Old, in the large bulge",
+    gas: "Limited, dust in the disc",
     lens: "800–1500 mm",
     integration: "4–8 h",
     filters: "L-RGB o OSC broadband",
-    processing: "Maschera il nucleo e aumenta il contrasto locale sulla banda di polvere.",
+    processing: "Mask the core and raise local contrast on the dust lane.",
     accent: "#ff9f7d",
   },
   {
-    id: "irregolare",
-    label: "Irregolare",
+    id: "irregular",
+    label: "Irregular",
     code: "Irr",
-    example: "Galassia Sigaro",
+    example: "Cigar Galaxy",
     catalog: "M82 · I0 starburst",
     summary:
-      "Non segue una simmetria ordinata. In M82 l'interazione con M81 ha innescato una violentissima formazione stellare e un vento galattico che emerge dal piano del disco.",
-    clue: "Forma asimmetrica, regioni H II intense, polveri caotiche e getti o filamenti fuori dal disco.",
+      "It follows no ordered symmetry. In M82, interaction with M81 triggered ferocious star formation and a galactic wind emerging from the plane of the disc.",
+    clue: "An asymmetric shape, intense H II regions, chaotic dust, and jets or filaments outside the disc.",
     image: "https://cdn.esahubble.org/archives/images/screen/heic0604a.jpg",
     source: "https://esahubble.org/images/heic0604a/",
-    credit: "NASA, ESA e Hubble Heritage Team",
+    credit: "NASA, ESA and the Hubble Heritage Team",
     distance: "≈ 12 Mly",
-    magnitude: "8,4",
-    angular: "11,2′ × 4,3′",
-    stars: "Formazione stellare estrema",
-    gas: "Vento ricco di Hα",
+    magnitude: "8.4",
+    angular: "11.2′ × 4.3′",
+    stars: "Extreme star formation",
+    gas: "An Hα-rich wind",
     lens: "500–1200 mm",
     integration: "3–8 h",
-    filters: "RGB/OSC + Hα o dual-band",
-    processing: "Integra Hα con cautela per evidenziare i filamenti senza saturare il nucleo.",
+    filters: "RGB/OSC + Hα or dual-band",
+    processing: "Blend Hα carefully to bring out the filaments without saturating the core.",
     accent: "#ff6b81",
   },
   {
-    id: "interagente",
-    label: "Interagente",
+    id: "interacting",
+    label: "Interacting",
     code: "Pec",
-    example: "Galassie Antenne",
+    example: "Antennae Galaxies",
     catalog: "NGC 4038/39 · Arp 244",
     summary:
-      "Due galassie deformate dalla reciproca gravità. Code mareali, ponti di materia e starburst mostrano una fusione in corso, uno dei principali motori dell'evoluzione galattica.",
-    clue: "Cerca nuclei doppi, archi deformati, code mareali e regioni blu o rosate di nuova formazione stellare.",
+      "Two galaxies deformed by each other's gravity. Tidal tails, bridges of matter and starbursts show a merger in progress, one of the main engines of galactic evolution.",
+    clue: "Look for double nuclei, distorted arcs, tidal tails and blue or pink regions of new star formation.",
     image: "https://supernova.eso.org/static/archives/exhibitionimages/screen/antennae_hst.jpg",
     source: "https://supernova.eso.org/exhibition/images/antennae_hst/",
-    credit: "ESA/Hubble e NASA",
+    credit: "ESA/Hubble and NASA",
     distance: "≈ 45 Mly",
-    magnitude: "10,9",
-    angular: "5,2′ × 3,1′",
-    stars: "Starburst da compressione",
-    gas: "Code e nubi disturbate",
+    magnitude: "10.9",
+    angular: "5.2′ × 3.1′",
+    stars: "Compression-driven starburst",
+    gas: "Tails and disturbed clouds",
     lens: "1000–2000 mm",
     integration: "8–16 h",
-    filters: "L-RGB/OSC; Hα utile",
-    processing: "Servono cielo scuro e stretch profondo per recuperare le deboli code mareali.",
+    filters: "L-RGB/OSC; Hα useful",
+    processing: "A dark sky and a deep stretch are needed to recover the faint tidal tails.",
     accent: "#7fffd0",
   },
 ];
@@ -194,22 +193,16 @@ export default function Home() {
       <div className="sky-noise" aria-hidden="true" />
       <header className="relative z-10 border-b border-white/10">
         <div className="mx-auto flex max-w-[1500px] items-center justify-between px-5 py-4 sm:px-8 lg:px-12">
-          <a
-            href="#top"
-            className="flex items-center gap-3"
-            aria-label="Atlante delle Galassie, inizio pagina"
-          >
+          <a href="#top" className="flex items-center gap-3" aria-label="Galaxy Atlas, top of page">
             <span className="brand-mark">
               <Orbit aria-hidden="true" />
             </span>
-            <span className="font-display text-lg font-semibold tracking-tight">
-              Atlante delle Galassie
-            </span>
+            <span className="font-display text-lg font-semibold tracking-tight">Galaxy Atlas</span>
           </a>
           <div className="hidden items-center gap-5 text-sm text-slate-400 sm:flex">
-            <span>Classificazione di Hubble</span>
+            <span>Hubble classification</span>
             <span className="h-1 w-1 rounded-full bg-cyan-300" />
-            <span>Guida astrofotografica</span>
+            <span>Astrophotography guide</span>
           </div>
         </div>
       </header>
@@ -220,21 +213,21 @@ export default function Home() {
       >
         <div className="mb-8 grid gap-6 lg:grid-cols-[minmax(0,1fr)_440px] lg:items-end">
           <div>
-            <p className="eyebrow">Morfologia · struttura · acquisizione</p>
+            <p className="eyebrow">Morphology · structure · acquisition</p>
             <h1 className="mt-3 max-w-4xl font-display text-[clamp(2.6rem,6vw,6.6rem)] font-semibold leading-[0.88] tracking-[-0.055em]">
-              Leggere una galassia<span className="block text-slate-500">dalla sua luce.</span>
+              Reading a galaxy<span className="block text-slate-500">from its light.</span>
             </h1>
           </div>
           <p className="max-w-xl text-base leading-7 text-slate-300 lg:pb-1">
-            Seleziona una famiglia morfologica per riconoscerne la struttura, confrontare un esempio
-            reale e preparare una sessione di astrofotografia.
+            Pick a morphological family to learn its structure, compare a real example and plan an
+            imaging session.
           </p>
         </div>
 
         <Tabs value={selectedId} onValueChange={setSelectedId} className="gap-0">
           <div className="scrollbar-none -mx-5 overflow-x-auto px-5 pb-5 sm:-mx-8 sm:px-8 lg:mx-0 lg:px-0">
             <TabsList
-              aria-label="Tipologie di galassie"
+              aria-label="Galaxy types"
               className="h-auto min-w-max gap-2 bg-transparent p-0"
             >
               {galaxies.map((g) => (
@@ -263,7 +256,7 @@ export default function Home() {
             <img
               key={selected.id}
               src={selected.image}
-              alt={`${selected.example}, esempio di galassia ${selected.label.toLowerCase()}`}
+              alt={`${selected.example}, an example of a ${selected.label.toLowerCase()} galaxy`}
               className="galaxy-image"
             />
             <div className="image-scrim" />
@@ -286,7 +279,7 @@ export default function Home() {
 
           <article className="flex flex-col bg-[#0c1324]/95 p-5 sm:p-8 lg:p-10">
             <div>
-              <p className="eyebrow">Profilo morfologico</p>
+              <p className="eyebrow">Morphological profile</p>
               <h3 className="mt-3 font-display text-3xl font-semibold tracking-tight sm:text-4xl">
                 {selected.label}
               </h3>
@@ -294,9 +287,9 @@ export default function Home() {
             </div>
             <div className="my-7 grid grid-cols-3 gap-px overflow-hidden rounded-xl border border-white/10 bg-white/10">
               {[
-                [selected.distance, "Distanza"],
-                [selected.magnitude, "Mag. apparente"],
-                [selected.angular, "Dimensione"],
+                [selected.distance, "Distance"],
+                [selected.magnitude, "Apparent mag."],
+                [selected.angular, "Angular size"],
               ].map(([value, label], index) => {
                 const Icon = statIcons[index];
                 return (
@@ -319,18 +312,18 @@ export default function Home() {
                   aria-hidden="true"
                 />
                 <div>
-                  <p className="text-sm font-semibold text-white">Come riconoscerla</p>
+                  <p className="text-sm font-semibold text-white">How to recognise it</p>
                   <p className="mt-1 text-sm leading-6 text-slate-400">{selected.clue}</p>
                 </div>
               </div>
             </div>
             <dl className="mt-auto grid gap-3 pt-7 text-sm">
               <div className="fact-row">
-                <dt>Popolazione stellare</dt>
+                <dt>Stellar population</dt>
                 <dd>{selected.stars}</dd>
               </div>
               <div className="fact-row">
-                <dt>Gas e polveri</dt>
+                <dt>Gas and dust</dt>
                 <dd>{selected.gas}</dd>
               </div>
             </dl>
@@ -341,18 +334,18 @@ export default function Home() {
       <section className="relative z-10 border-y border-white/10 bg-white/[0.025]">
         <div className="mx-auto grid max-w-[1500px] lg:grid-cols-[0.75fr_1.25fr]">
           <div className="border-b border-white/10 px-5 py-10 sm:px-8 lg:border-b-0 lg:border-r lg:px-12 lg:py-14">
-            <p className="eyebrow">Mappa evolutiva</p>
+            <p className="eyebrow">Evolutionary map</p>
             <h2 className="mt-3 font-display text-3xl font-semibold tracking-tight sm:text-4xl">
-              La sequenza di Hubble non è una timeline.
+              The Hubble sequence is not a timeline.
             </h2>
             <p className="mt-4 max-w-lg leading-7 text-slate-400">
-              Il celebre “diapason” ordina l’aspetto delle galassie, non la loro età. Le
-              trasformazioni reali dipendono da gas, massa, ambiente, fusioni e formazione stellare.
+              The famous “tuning fork” orders galaxies by appearance, not by age. Real
+              transformations depend on gas, mass, environment, mergers and star formation.
             </p>
           </div>
           <div
             className="hubble-map px-5 py-10 sm:px-8 lg:px-12 lg:py-14"
-            aria-label="Schema semplificato della classificazione di Hubble"
+            aria-label="Simplified diagram of the Hubble classification"
           >
             <div className="hubble-node hubble-start">
               <strong>E0–E7</strong>
@@ -386,7 +379,7 @@ export default function Home() {
       <section className="relative z-10 mx-auto max-w-[1500px] px-5 py-12 sm:px-8 lg:px-12 lg:py-16">
         <div className="mb-7 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
           <div>
-            <p className="eyebrow">Scheda di acquisizione</p>
+            <p className="eyebrow">Acquisition sheet</p>
             <h2 className="mt-3 font-display text-3xl font-semibold tracking-tight sm:text-4xl">
               Pianifica lo scatto di {selected.example}
             </h2>
@@ -400,23 +393,23 @@ export default function Home() {
           {[
             {
               icon: Focus,
-              title: "Focale utile",
+              title: "Useful focal length",
               value: selected.lens,
-              note: "Adatta il campionamento al seeing",
+              note: "Match the sampling to the seeing",
             },
             {
               icon: Clock3,
-              title: "Integrazione",
+              title: "Integration",
               value: selected.integration,
-              note: "Più tempo per strutture deboli",
+              note: "More time for faint structure",
             },
             {
               icon: Aperture,
-              title: "Filtri",
+              title: "Filters",
               value: selected.filters,
-              note: "Broadband sotto cieli scuri",
+              note: "Broadband under dark skies",
             },
-            { icon: Camera, title: "Sviluppo", value: "Workflow", note: selected.processing },
+            { icon: Camera, title: "Processing", value: "Workflow", note: selected.processing },
           ].map(({ icon: Icon, title, value, note }) => (
             <article key={title} className="tech-card">
               <Icon className="h-5 w-5 text-cyan-300" aria-hidden="true" />
@@ -432,8 +425,8 @@ export default function Home() {
 
       <footer className="relative z-10 border-t border-white/10 px-5 py-7 sm:px-8 lg:px-12">
         <div className="mx-auto flex max-w-[1500px] flex-col gap-2 text-sm text-slate-500 sm:flex-row sm:items-center sm:justify-between">
-          <p>Atlante visuale per astrofotografi curiosi.</p>
-          <p>Dati arrotondati · immagini accreditate alle rispettive missioni.</p>
+          <p>A visual atlas for curious astrophotographers.</p>
+          <p>Rounded figures · images credited to their respective missions.</p>
         </div>
       </footer>
     </main>

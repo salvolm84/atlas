@@ -57,8 +57,10 @@ for (const r of s.objects.map((o) => s.targetNight(o, winter))) {
 }
 const phase = s.makeNight("2026-01-18", MODENA).moonLight;
 assert(phase < 0.03);
-assert.equal(s.cardinal(270), "O");
+assert.equal(s.cardinal(270), "W");
 assert.equal(s.cardinal(359), "N");
+assert.equal(s.cardinal(225), "SW");
+assert.equal(s.cardinal(315), "NW");
 
 // Transit altitude and the never-rises boundary, for Modena. These were once
 // duplicated as the literals 44.6471 and -45.3529 in two components whose

@@ -29,10 +29,10 @@ export function FovView({ o, scope }: { o: DSO; scope: ScopeId }) {
     <div className="fov-block">
       <div className="section-heading">
         <div>
-          <p className="eyebrow">Simulatore di campo</p>
-          <h3>Il tuo Seestar, su cielo reale</h3>
+          <p className="eyebrow">Field simulator</p>
+          <h3>Your Seestar, on the real sky</h3>
         </div>
-        <span className="tag">DSS2 · ottico</span>
+        <span className="tag">DSS2 · optical</span>
       </div>
       <div className="sky-view">
         {/* The survey frame is fetched live from CDS and this view also ships in the
@@ -41,7 +41,7 @@ export function FovView({ o, scope }: { o: DSO; scope: ScopeId }) {
         <img
           key={key}
           src={url + (attempt ? "&retry=" + attempt : "")}
-          alt={"Campo astronomico DSS2 centrato su " + o.key}
+          alt={"DSS2 sky field centred on " + o.key}
           onLoad={() => setLoaded(key)}
           onError={() => setFailed(key)}
           className={ok ? "ready" : ""}
@@ -51,16 +51,14 @@ export function FovView({ o, scope }: { o: DSO; scope: ScopeId }) {
             {err ? (
               <>
                 <Info size={22} />
-                <strong>Survey non disponibile</strong>
-                <span>
-                  La geometria del campo resta valida. Nessuna immagine simulata del cielo.
-                </span>
-                <button onClick={() => setAttempt(attempt + 1)}>Riprova immagine</button>
+                <strong>Survey unavailable</strong>
+                <span>The field geometry is still valid. No simulated sky image is shown.</span>
+                <button onClick={() => setAttempt(attempt + 1)}>Retry image</button>
               </>
             ) : (
               <>
                 <LoaderCircle className="spin" size={24} />
-                <span>Caricamento survey astronomica…</span>
+                <span>Loading sky survey…</span>
               </>
             )}
           </div>
@@ -69,13 +67,12 @@ export function FovView({ o, scope }: { o: DSO; scope: ScopeId }) {
           viewBox="0 0 1000 1000"
           role="img"
           aria-label={
-            "Campo " +
             scopes[scope].name +
-            ": " +
+            " field: " +
             f.width.toFixed(2) +
-            " per " +
+            " by " +
             f.height.toFixed(2) +
-            " gradi"
+            " degrees"
           }
         >
           <defs>
@@ -138,10 +135,10 @@ export function FovView({ o, scope }: { o: DSO; scope: ScopeId }) {
       <div className="frame-controls">
         <div className="rotation">
           <label>
-            Angolo di posizione <b>{angle}°</b>
+            Position angle <b>{angle}°</b>
           </label>
           <Slider
-            aria-label="Angolo di posizione del campo"
+            aria-label="Field position angle"
             min={0}
             max={180}
             step={1}
@@ -150,18 +147,18 @@ export function FovView({ o, scope }: { o: DSO; scope: ScopeId }) {
           />
         </div>
         <Choice
-          label="Zoom della mappa"
+          label="Map zoom"
           value={scale}
           onChange={setScale}
           options={[
-            ["1", "Campo largo"],
+            ["1", "Wide field"],
             ["2", "Zoom ×2"],
             ["4", "Zoom ×4"],
           ]}
         />
         <button
           className="icon-btn"
-          aria-label="Ripristina inquadratura"
+          aria-label="Reset framing"
           onClick={() => {
             setAngle(0);
             setScale("1");
@@ -173,24 +170,24 @@ export function FovView({ o, scope }: { o: DSO; scope: ScopeId }) {
       <div className={"fit-note " + (fit === false ? "warning" : "")}>
         <span>
           {fit === null
-            ? "Dimensioni non disponibili"
+            ? "Dimensions not available"
             : fit
-              ? "Sagoma catalogata contenuta nel singolo campo"
-              : "Sagoma oltre il campo: valuta rotazione o mosaico"}
+              ? "Catalogued outline fits inside a single frame"
+              : "Outline exceeds the frame: consider rotating, or a mosaic"}
         </span>
         <b>{fmt(f.scale, 2)}″/px</b>
       </div>
       <p className="caption">
-        Ciano: sensore nativo, formato verticale. Giallo: ellisse delle dimensioni catalogate, non
-        il limite esatto della nebulosità. Nord in alto, est a sinistra; PA da nord verso est.
-        Rotazione geometrica, non un comando al telescopio. In alt-az il campo ruota; crop e mosaici
-        non sono simulati.
+        Cyan: the native sensor, in portrait orientation. Yellow: the ellipse of the catalogued
+        dimensions, not the exact edge of the nebulosity. North is up and east is left; PA runs from
+        north towards east. The rotation is geometric, not a command to the telescope. On an alt-az
+        mount the field rotates; crops and mosaics are not simulated.
       </p>
       <p className="caption">
-        DSS2/STScI via CDS HiPS2FITS: fotografie di survey, non una previsione di dettaglio, colore
-        o rumore ottenibile con Seestar.{" "}
+        DSS2/STScI via CDS HiPS2FITS: survey photographs, not a prediction of the detail, colour or
+        noise a Seestar will achieve.{" "}
         <a href={url} target="_blank" rel="noreferrer">
-          Apri survey ↗
+          Open survey ↗
         </a>
       </p>
     </div>

@@ -9,7 +9,7 @@ import "../app/globals.css";
 const morphology = document.body.dataset.page === "morphology";
 const home = (
   <a href="./index.html" style={{ display: "block", padding: "16px 24px", color: "#78e5ff" }}>
-    ← Atlante Deep Sky · Modena
+    ← Deep Sky Atlas
   </a>
 );
 
@@ -17,7 +17,7 @@ const home = (
 // page with no console the reader would think to open.
 createRoot(document.getElementById("root")!).render(
   <ErrorBoundary
-    area="L’atlante"
+    area="The atlas"
     fallback={(error) => (
       <div
         style={{
@@ -28,14 +28,12 @@ createRoot(document.getElementById("root")!).render(
         }}
       >
         {home}
-        <h1 style={{ fontSize: "19px" }}>L’atlante non è riuscito ad avviarsi</h1>
+        <h1 style={{ fontSize: "19px" }}>The atlas could not start</h1>
         <p style={{ color: "#a8b9cb", fontSize: "14px" }}>
-          Ricarica la pagina. Se l’errore persiste, l’archivio potrebbe essere stato estratto solo
-          parzialmente: estrai di nuovo l’intera cartella e riapri <code>index.html</code>.
+          Reload the page. If the error persists the archive may have been only partly extracted:
+          extract the whole folder again and reopen <code>index.html</code>.
         </p>
-        <p style={{ color: "#ebc184", fontSize: "13px" }}>
-          {error.message || "Errore sconosciuto"}
-        </p>
+        <p style={{ color: "#ebc184", fontSize: "13px" }}>{error.message || "Unknown error"}</p>
       </div>
     )}
   >

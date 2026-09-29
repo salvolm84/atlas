@@ -1,4 +1,4 @@
-ATLANTE DEEP SKY — v1.1.0
+DEEP SKY ATLAS — v1.1.0
 
 1. Extract the entire ZIP into a folder.
 2. Double-click index.html and open it in a modern desktop browser.
@@ -12,7 +12,7 @@ DSS2 survey photographs and the morphology gallery require internet. Their
 availability depends on the external providers. The field-of-view geometry
 remains usable when the survey image cannot load.
 
-The interface is in Italian and the observing location is Modena, Italy.
+The observing location is Modena, Italy.
 Use morfologia.html for the galaxy morphology guide.
 
 To modify the app, use the source repository (or the source archive), not the

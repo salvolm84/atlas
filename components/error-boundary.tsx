@@ -8,7 +8,7 @@ type Props = {
   fallback?: (error: Error, reset: () => void) => ReactNode;
   /** Changing this value clears a captured error, e.g. on a new selection. */
   resetKey?: unknown;
-  /** Italian label naming the failed area, used in the default panel. */
+  /** Label naming the failed area, used in the default panel. */
   area?: string;
 };
 
@@ -33,7 +33,7 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, info: ErrorInfo) {
-    console.error("Atlante Deep Sky — errore di rendering", error, info.componentStack);
+    console.error("Deep Sky Atlas — render error", error, info.componentStack);
   }
 
   reset = () => this.setState({ error: null });
@@ -47,13 +47,13 @@ export class ErrorBoundary extends Component<Props, State> {
       <div className="object-panel">
         <div className="empty-state">
           <Orbit size={28} />
-          <h3>{this.props.area ?? "Questa sezione"} non è disponibile</h3>
+          <h3>{this.props.area ?? "This section"} is unavailable</h3>
           <p>
-            Si è verificato un errore inatteso durante la visualizzazione. Il resto dell’atlante
-            resta utilizzabile: prova a scegliere un altro oggetto o a ricaricare la pagina.
+            Something went wrong while displaying this. The rest of the atlas still works: try
+            picking another object, or reload the page.
           </p>
-          <div className="notice warning">{error.message || "Errore sconosciuto"}</div>
-          <button onClick={this.reset}>Riprova</button>
+          <div className="notice warning">{error.message || "Unknown error"}</div>
+          <button onClick={this.reset}>Try again</button>
         </div>
       </div>
     );

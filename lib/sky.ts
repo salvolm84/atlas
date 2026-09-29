@@ -72,18 +72,18 @@ export const transitAltitude = (dec: number, site: Site) => 90 - Math.abs(site.l
 /** True when a declination never clears this site's horizon. */
 export const neverRises = (dec: number, site: Site) => transitAltitude(dec, site) <= 0;
 export const MONTHS = [
-  "Gen",
+  "Jan",
   "Feb",
   "Mar",
   "Apr",
-  "Mag",
-  "Giu",
-  "Lug",
-  "Ago",
-  "Set",
-  "Ott",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
   "Nov",
-  "Dic",
+  "Dec",
 ];
 export const DEG = Math.PI / 180;
 export const scopes = {
@@ -121,15 +121,15 @@ export function fov(id: ScopeId) {
 }
 export function fmt(n: number | null, digits = 1) {
   return n === null
-    ? "Non disponibile"
-    : n.toLocaleString("it-IT", { maximumFractionDigits: digits });
+    ? "Not available"
+    : n.toLocaleString("en-GB", { maximumFractionDigits: digits });
 }
 export function distanceText(n: number | null) {
   return n === null
-    ? "Non disponibile"
+    ? "Not available"
     : n >= 1e6
-      ? fmt(n / 1e6, 2) + " milioni a.l."
-      : fmt(n, 0) + " a.l.";
+      ? fmt(n / 1e6, 2) + " million ly"
+      : fmt(n, 0) + " ly";
 }
 
 /** Calendar date at the site, as YYYY-MM-DD. */
@@ -142,7 +142,7 @@ export function siteDate(d: Date, site: Site) {
   }).format(d);
 }
 export function clock(ms: number, site: Site) {
-  return new Intl.DateTimeFormat("it-IT", {
+  return new Intl.DateTimeFormat("en-GB", {
     timeZone: site.timeZone,
     hour: "2-digit",
     minute: "2-digit",
@@ -239,7 +239,7 @@ export function makeNight(day: string, site: Site): Night {
 export type Sector = { start: number; span: number };
 export const bearing = (az: number) => ((az % 360) + 360) % 360;
 export const cardinal = (az: number) =>
-  ["N", "NE", "E", "SE", "S", "SO", "O", "NO"][Math.round(bearing(az) / 45) % 8];
+  ["N", "NE", "E", "SE", "S", "SW", "W", "NW"][Math.round(bearing(az) / 45) % 8];
 export const inSector = (az: number, s: Sector) =>
   s.span >= 360 || bearing(az - s.start) <= s.span + 1e-9;
 export type TargetNight = {
@@ -352,14 +352,14 @@ export function surfaceBrightness(o: DSO) {
 }
 export function photoAdvice(o: DSO) {
   if (o.group === "galaxy")
-    return "Luce a banda larga: UV/IR-cut. Il dual-band elimina molta luce stellare. Cerca notti senza Luna, integra a lungo e proteggi il nucleo durante lo stretch.";
+    return "Broadband light: use a UV/IR-cut filter. A dual-band filter removes most of the starlight. Look for moonless nights, integrate for a long time, and protect the core while stretching.";
   if (o.type === "RN" || o.type === "DN" || o.messier === 45)
-    return "UV/IR-cut e cielo buio. Polveri e nebulose a riflessione soffrono molto Luna e inquinamento luminoso; il dual-band non è la scelta adatta.";
+    return "UV/IR-cut and a dark sky. Dust and reflection nebulae suffer badly from the Moon and from light pollution; a dual-band filter is the wrong choice here.";
   if (o.group === "cluster")
-    return "UV/IR-cut, posa che non saturi le stelle più luminose e stretch moderato. Nei globulari conserva la separazione delle stelle al centro.";
+    return "UV/IR-cut, an exposure that does not saturate the brightest stars, and a moderate stretch. In globulars, keep the stars separated towards the centre.";
   if (o.group === "other")
-    return "Oggetto catalogato per completezza: non è una galassia o una nebulosa isolata. Verifica la natura del campo prima di pianificare.";
-  return "Il dual-band Hα/O III può aumentare il contrasto delle emissioni dal cielo urbano. Integra per più ore; luminosità e dettagli dipendono da trasparenza, Luna e calibrazione.";
+    return "Catalogued for completeness: this is not a galaxy or an isolated nebula. Check what the field actually contains before planning it.";
+  return "A dual-band H-alpha / O III filter can raise emission contrast under an urban sky. Integrate for several hours; brightness and detail depend on transparency, the Moon and calibration.";
 }
 export function surveyURL(o: DSO, field: number, size = 700) {
   const q = new URLSearchParams({

@@ -1,8 +1,8 @@
-# Atlante Deep Sky · Modena
+# Deep Sky Atlas · Modena
 
 [![CI](https://github.com/salvolm84/atlas/actions/workflows/ci.yml/badge.svg)](https://github.com/salvolm84/atlas/actions/workflows/ci.yml)
 
-An Italian-language deep-sky atlas and astrophotography planner for **Modena, Italy**, with **248 catalogue entries**, Seestar field-of-view overlays and a circular horizon filter.
+An English-language deep-sky atlas and astrophotography planner for **Modena, Italy**, with **248 catalogue entries**, Seestar field-of-view overlays and a circular horizon filter.
 
 Choose a night, select your telescope and mark the part of the sky you can see. The atlas ranks targets using darkness, altitude, available observing time, Moon conditions and apparent size.
 
