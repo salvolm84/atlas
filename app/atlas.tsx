@@ -1,5 +1,5 @@
 "use client";
-import { useMemo, useState, useDeferredValue } from "react";
+import { useEffect, useMemo, useState, useDeferredValue } from "react";
 import {
   Orbit,
   Moon,
@@ -23,6 +23,7 @@ import {
   fmt,
   makeNight,
   MODENA,
+  siteKey,
   neverRises,
   objects,
   scopes,
@@ -34,6 +35,10 @@ import {
 import { Choice } from "./choice";
 import { ObjectDetails } from "./object-details";
 import { SitePicker } from "./site-picker";
+import { fetchClouds, type CloudForecast } from "@/lib/weather";
+
+// Stable identity, so a render while loading is not a new prop every time.
+const CLOUDS_LOADING: CloudForecast = { state: "loading" };
 export default function Atlas({
   initialDate,
   localMode = false,
@@ -66,6 +71,21 @@ export default function Atlas({
   // Seasonality is another ~12 full-night sweeps feeding a chart nobody reads
   // mid-drag, so let the ranked list repaint first and settle the panel after.
   const detailSector = useDeferredValue(nightSector);
+  // The forecast depends on the place and the night, not on which object is
+  // selected, so it is fetched here rather than in the detail panel.
+  // "Loading" is derived rather than set from the effect: a result is tagged
+  // with the site and night it belongs to, and anything else means in flight.
+  // Setting it in the effect body would cascade an extra render.
+  const [loaded, setLoaded] = useState<{ key: string; value: CloudForecast } | null>(null);
+  const cloudKey = siteKey(site) + "|" + day;
+  const clouds: CloudForecast = loaded?.key === cloudKey ? loaded.value : CLOUDS_LOADING;
+  useEffect(() => {
+    const controller = new AbortController();
+    fetchClouds(site, day, controller.signal)
+      .then((value) => setLoaded({ key: cloudKey, value }))
+      .catch(() => {}); // only ever an abort; the fetch reports its own failures
+    return () => controller.abort();
+  }, [site, day, cloudKey]);
   const ranked = useMemo(
     () =>
       objects
@@ -387,6 +407,7 @@ export default function Atlas({
                   scope={scope}
                   sector={detailSector}
                   site={site}
+                  clouds={clouds}
                 />
               </ErrorBoundary>
             ) : (
@@ -400,12 +421,19 @@ export default function Atlas({
         <section id="method" className="method-panel">
           <div>
             <p className="eyebrow">How the numbers are made</p>
-            <h2>Un piano astronomico, non una previsione meteo.</h2>
+            <h2>An astronomical plan, not a weather forecast.</h2>
             <p>
               The 0–100 score is a heuristic: 50% useful duration, 35% mean altitude, 15% magnitude,
               then penalties for the Moon and for objects small against the sampling. At least 30
               minutes of window are required. It does not measure signal-to-noise, and it excludes
               cloud, seeing, obstructions, humidity and local light pollution.
+            </p>
+            <p>
+              Cloud cover is shown beside the night chart when a forecast is available, and is
+              deliberately <b>not</b> part of the score: everything else here is computed locally
+              and is the same for everyone, whereas a forecast expires, reaches about sixteen days
+              ahead and needs the internet. Treat it as somebody else&apos;s prediction, not a
+              measurement of your sky.
             </p>
             <p>
               J2000 coordinates precessed to the date with Astronomy Engine; Sun and Moon
@@ -439,6 +467,9 @@ export default function Atlas({
               </a>
               <a href="https://github.com/cosinekitty/astronomy" target="_blank" rel="noreferrer">
                 Astronomy Engine
+              </a>
+              <a href="https://open-meteo.com/" target="_blank" rel="noreferrer">
+                Open-Meteo cloud forecast · CC BY 4.0
               </a>
               <a
                 href="https://alasky.cds.unistra.fr/hips-image-services/hips2fits"

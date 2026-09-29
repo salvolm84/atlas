@@ -151,9 +151,98 @@ assert(markup.includes('aria-valuemin="0"') && markup.includes('aria-valuemax="3
 // Decorative geometry must not be announced alongside the handles.
 assert((markup.match(/aria-hidden="true"/g) ?? []).length >= 8, "decorative parts are hidden");
 
+// ---------------------------------------------------------------------------
+// The cloud forecast. Network shapes are parsed by pure functions so the
+// failure paths can be checked without touching the network.
+// ---------------------------------------------------------------------------
+const weather = load("../lib/weather.ts", { "./sky": sky });
+
+// The URL must not leak a precise position: coordinates are rounded to about
+// a kilometre, which is finer than the forecast grid anyway.
+const url = new URL(
+  weather.cloudUrl({ ...sky.MODENA, latitude: 44.64713456, longitude: 10.92521 }, "2026-01-15"),
+);
+assert.equal(url.searchParams.get("latitude"), "44.65");
+assert.equal(url.searchParams.get("longitude"), "10.93");
+assert.equal(url.searchParams.get("timeformat"), "unixtime");
+assert.equal(url.searchParams.get("start_date"), "2026-01-15");
+assert.equal(url.searchParams.get("end_date"), "2026-01-16", "the night runs into the next day");
+assert.equal(url.searchParams.get("hourly"), "cloud_cover");
+// A southern, negative-coordinate site must round toward the right sign.
+const south = new URL(
+  weather.cloudUrl({ ...sky.MODENA, latitude: -33.8688, longitude: -70.6693 }, "2026-01-15"),
+);
+assert.equal(south.searchParams.get("latitude"), "-33.87");
+assert.equal(south.searchParams.get("longitude"), "-70.67");
+
+// The real payload shape, as returned by the service.
+const parsed = weather.readCloudPayload({
+  hourly: { time: [1790726400, 1790730000, 1790733600], cloud_cover: [0, 45, 90] },
+});
+assert.equal(parsed.state, "ready");
+assert.equal(parsed.hours.length, 3);
+assert.equal(parsed.hours[0].ms, 1790726400000, "unixtime is seconds, not milliseconds");
+
+// An out-of-range date: the service names the window it covers, and that is
+// more useful to a reader than "request failed".
+const far = weather.readCloudPayload({
+  error: true,
+  reason: "Parameter 'start_date' is out of allowed range from 2026-06-28 to 2026-10-14",
+});
+assert.equal(far.state, "unavailable");
+assert(far.reason.includes("2026-06-28") && far.reason.includes("2026-10-14"), far.reason);
+
+// Degenerate payloads must degrade, never throw.
+for (const body of [{}, { hourly: {} }, { hourly: { time: [], cloud_cover: [] } }, { error: true }])
+  assert.equal(weather.readCloudPayload(body).state, "unavailable", JSON.stringify(body));
+// Nulls in the series are dropped rather than read as zero cloud.
+const holes = weather.readCloudPayload({
+  hourly: { time: [1790726400, 1790730000], cloud_cover: [null, 50] },
+});
+assert.equal(holes.hours.length, 1);
+assert.equal(holes.hours[0].cloud, 50);
+
+// Nearest-hour lookup, and the refusal to stretch a sample across a gap.
+const hours = [
+  { ms: 1790726400000, cloud: 10 },
+  { ms: 1790730000000, cloud: 80 },
+];
+assert.equal(weather.cloudAt(hours, 1790726400000), 10);
+assert.equal(weather.cloudAt(hours, 1790726400000 + 5 * 60000), 10, "nearest hour wins");
+assert.equal(weather.cloudAt(hours, 1790730000000 - 5 * 60000), 80);
+assert.equal(weather.cloudAt(hours, 1790726400000 - 3 * 3600000), null, "no sample, no guess");
+assert.equal(weather.cloudAt([], 1790726400000), null);
+
+// Bands, at their boundaries.
+assert.equal(weather.describeCloud(0), "clear");
+assert.equal(weather.describeCloud(11), "clear");
+assert.equal(weather.describeCloud(12), "mostly clear");
+assert.equal(weather.describeCloud(45), "partly cloudy");
+assert.equal(weather.describeCloud(70), "mostly cloudy");
+assert.equal(weather.describeCloud(100), "overcast");
+
+// Mean over the useful windows, including a window the forecast only half covers.
+const full = weather.cloudOverWindows(hours, [{ start: 1790726400000, end: 1790730000000 }]);
+assert.equal(full.covered, full.total, "a covered window reports every sample");
+assert(full.mean > 10 && full.mean < 80);
+const partial = weather.cloudOverWindows(hours, [
+  { start: 1790726400000 - 6 * 3600000, end: 1790726400000 - 5 * 3600000 },
+]);
+assert.equal(partial.covered, 0, "a window outside the forecast covers nothing");
+assert(Number.isNaN(partial.mean));
+// No windows at all must not divide by zero.
+assert.equal(weather.cloudOverWindows(hours, []).total, 0);
+
 console.log(
   JSON.stringify(
-    { passed: true, checks: ["site draft parsing and bounds", "horizon dial keyboard and ARIA"] },
+    {
+      passed: true,
+      checks: [
+        "site draft parsing and bounds",
+        "horizon dial keyboard and ARIA",
+        "cloud forecast parsing",
+      ],
+    },
     null,
     2,
   ),

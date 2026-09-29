@@ -125,7 +125,8 @@ Review provenance and licensing before adding another data source. The generatio
 - Score 0–100 is a heuristic: 50% useful duration, 35% mean altitude factor, 15% integrated magnitude, followed by Moon and small-object penalties. It is **not** an SNR estimate or a guarantee of a successful photograph.
 - Seasonality samples the 15th of each month. “Best” months have at least 80% of the maximum monthly useful duration, with the same altitude/sector constraints and no lunar penalty.
 - Integrated magnitude is not surface brightness. Average surface brightness is an estimate from magnitude and an elliptical catalogue area; it is not intrinsic luminosity.
-- Buildings, trees, clouds, humidity, seeing, atmospheric extinction and local light pollution are not modelled. The horizon sector is a simple user-defined azimuth mask, not an obstacle map.
+- Buildings, trees, humidity, seeing, atmospheric extinction and local light pollution are not modelled. The horizon sector is a simple user-defined azimuth mask, not an obstacle map.
+- Cloud cover is fetched from [Open-Meteo](https://open-meteo.com/) and displayed beside the night chart. It is **not** part of the 0–100 score, which stays a purely astronomical, offline, reproducible figure. The forecast reaches roughly sixteen days ahead and needs the internet; outside that it is simply absent. Coordinates are rounded to about a kilometre before being sent.
 
 ### Telescope geometry
 
@@ -141,6 +142,7 @@ FOV is calculated as `2 × atan(sensor dimension / (2 × focal length))`. The ov
 - [Stellarium DSO catalogue](https://github.com/Stellarium/stellarium/blob/master/nebulae/default/catalog.txt), bundled snapshot labelled DSO 3.23; see `public/data/NOTICE.txt`, original TSV, generation script and `COPYING-Stellarium.txt`.
 - NASA/Hubble distances supplement [M65](https://science.nasa.gov/mission/hubble/science/explore-the-night-sky/hubble-messier-catalog/messier-65/) and [C68](https://science.nasa.gov/mission/hubble/science/explore-the-night-sky/hubble-caldwell-catalog/caldwell-68/).
 - [Astronomy Engine](https://github.com/cosinekitty/astronomy) supplies astronomical calculations.
+- Cloud forecasts come from [Open-Meteo](https://open-meteo.com/), used without an API key. Their data is licensed CC BY 4.0.
 - DSS2/STScI sky imagery is requested through [CDS HiPS2FITS](https://alasky.cds.unistra.fr/hips-image-services/hips2fits).
 - Instrument references: ZWO [S30 Pro](https://www.seestar.com/products/seestar-s30-pro) and [S50 Pro](https://www.seestar.com/products/seestar-s50-pro-smart-telescope).
 - The morphology guide credits and links each photograph in its interface. Photographs are loaded from their providers, not included in the ZIP.

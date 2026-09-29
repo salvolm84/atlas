@@ -1,9 +1,11 @@
 "use client";
 import { useMemo } from "react";
-import { ArrowUpRight, Stars } from "lucide-react";
+import { ArrowUpRight, Cloud, Stars } from "lucide-react";
 import { ChartContainer, ChartTooltip } from "@/components/ui/chart";
+import { cloudAt, cloudOverWindows, describeCloud, type CloudForecast } from "@/lib/weather";
 import {
-  LineChart,
+  Area,
+  ComposedChart,
   Line,
   XAxis,
   YAxis,
@@ -38,6 +40,7 @@ export function ObjectDetails({
   scope,
   sector,
   site,
+  clouds,
 }: {
   r: TargetNight;
   day: string;
@@ -45,6 +48,7 @@ export function ObjectDetails({
   scope: ScopeId;
   sector: Sector;
   site: Site;
+  clouds: CloudForecast;
 }) {
   const o = r.o,
     year = Number(day.slice(0, 4));
@@ -59,11 +63,21 @@ export function ObjectDetails({
     .join(" · ");
   const maxPossible = transitAltitude(o.dec, site),
     sb = surfaceBrightness(o);
+  const cloudHours = clouds.state === "ready" ? clouds.hours : [];
   const chart = r.curve
     .filter((p) => p.sun < 5)
-    .map((p) => ({ ...p, alt: Math.round(p.alt * 10) / 10, moon: Math.round(p.moon * 10) / 10 }));
+    .map((p) => ({
+      ...p,
+      alt: Math.round(p.alt * 10) / 10,
+      moon: Math.round(p.moon * 10) / 10,
+      // null leaves a gap rather than drawing a guessed value.
+      cloud: cloudHours.length ? cloudAt(cloudHours, p.ms) : null,
+    }));
   const firstDark = chart.find((p) => p.sun < -18),
     lastDark = [...chart].reverse().find((p) => p.sun < -18);
+  // Mean cover across this target's useful windows, which is the number that
+  // decides whether tonight is worth setting up for.
+  const windowCloud = cloudHours.length ? cloudOverWindows(cloudHours, r.windows) : null;
   return (
     <article className="object-panel">
       <header className="object-title">
@@ -139,10 +153,12 @@ export function ObjectDetails({
       <section className="night-detail">
         <div className="section-heading">
           <div>
-            <p className="eyebrow">Modena · Europe/Rome</p>
+            <p className="eyebrow">
+              {site.name} · {site.timeZone}
+            </p>
             <h3>Tonight’s window</h3>
           </div>
-          <span className="tag">Soglia {minAlt}°</span>
+          <span className="tag">Threshold {minAlt}°</span>
         </div>
         <div className="window-list">
           {r.windows.length ? (
@@ -159,10 +175,11 @@ export function ObjectDetails({
           config={{
             alt: { label: o.key, color: "#78e5ff" },
             moon: { label: "Moon", color: "#b09dfc" },
+            cloud: { label: "Cloud", color: "#94a3b8" },
           }}
           className="altitude-chart"
         >
-          <LineChart
+          <ComposedChart
             accessibilityLayer
             data={chart}
             margin={{ top: 15, right: 15, bottom: 5, left: -15 }}
@@ -177,22 +194,50 @@ export function ObjectDetails({
               tick={{ fontSize: 12 }}
             />
             <YAxis
+              yAxisId="alt"
               domain={[-20, 90]}
               ticks={[0, 30, 60, 90]}
               tickFormatter={(v) => v + "°"}
               tick={{ fontSize: 12 }}
             />
-            {firstDark && lastDark && (
-              <ReferenceArea x1={firstDark.ms} x2={lastDark.ms} fill="#78e5ff" fillOpacity={0.04} />
+            {/* Percent, on its own hidden scale so it cannot be misread as degrees. */}
+            <YAxis yAxisId="cloud" domain={[0, 100]} hide />
+            {cloudHours.length > 0 && (
+              <Area
+                yAxisId="cloud"
+                type="monotone"
+                dataKey="cloud"
+                stroke="#94a3b8"
+                strokeWidth={1}
+                fill="#94a3b8"
+                fillOpacity={0.16}
+                connectNulls={false}
+                dot={false}
+                isAnimationActive={false}
+              />
             )}
-            <ReferenceLine y={minAlt} stroke="#7f95ad" strokeDasharray="4 4" />
-            <ReferenceLine y={0} stroke="#4b576a" />
+            {firstDark && lastDark && (
+              <ReferenceArea
+                yAxisId="alt"
+                x1={firstDark.ms}
+                x2={lastDark.ms}
+                fill="#78e5ff"
+                fillOpacity={0.04}
+              />
+            )}
+            <ReferenceLine yAxisId="alt" y={minAlt} stroke="#7f95ad" strokeDasharray="4 4" />
+            <ReferenceLine yAxisId="alt" y={0} stroke="#4b576a" />
             <ChartTooltip
               labelFormatter={(v) => clock(Number(v), site)}
-              formatter={(v, n) => [fmt(Number(v)) + "°", n === "alt" ? o.key : "Moon"]}
+              formatter={(v, n) =>
+                n === "cloud"
+                  ? [fmt(Number(v), 0) + "%", "Cloud"]
+                  : [fmt(Number(v)) + "°", n === "alt" ? o.key : "Moon"]
+              }
               contentStyle={{ background: "#101a2c", border: "1px solid #334155", color: "white" }}
             />
             <Line
+              yAxisId="alt"
               type="monotone"
               dataKey="alt"
               stroke="#78e5ff"
@@ -201,6 +246,7 @@ export function ObjectDetails({
               isAnimationActive={false}
             />
             <Line
+              yAxisId="alt"
               type="monotone"
               dataKey="moon"
               stroke="#b09dfc"
@@ -209,8 +255,27 @@ export function ObjectDetails({
               dot={false}
               isAnimationActive={false}
             />
-          </LineChart>
+          </ComposedChart>
         </ChartContainer>
+        {clouds.state === "loading" ? (
+          <p className="caption">Loading the cloud forecast…</p>
+        ) : clouds.state === "unavailable" ? (
+          <p className="caption">Cloud forecast unavailable. {clouds.reason}</p>
+        ) : windowCloud && windowCloud.covered > 0 ? (
+          <p className="notice">
+            <Cloud size={17} />
+            <span>
+              Forecast {describeCloud(windowCloud.mean)} during the useful window:{" "}
+              {fmt(windowCloud.mean, 0)}% mean cloud cover
+              {windowCloud.covered < windowCloud.total ? ", covering only part of the window" : ""}.
+              A forecast, not a measurement, and no part of the score.
+            </span>
+          </p>
+        ) : cloudHours.length && r.windows.length === 0 ? (
+          <p className="caption">
+            Cloud forecast loaded, but this target has no useful window tonight to report it over.
+          </p>
+        ) : null}
         <p className="caption">
           <span className="cyan">Object: cyan</span> ·{" "}
           <span className="lilac">Moon: dashed violet</span> · blue background: astronomical

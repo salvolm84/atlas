@@ -32,6 +32,11 @@ generated HTML. See README.md in the source project for setup and build steps.
 On iOS/Android, opening downloaded HTML may be restricted by the OS or file
 previewer. Use the hosted app or serve this folder with a local static server.
 
-This is an observing planner, not a weather forecast or telescope controller.
-Times have 15-minute sampling; local obstructions and atmospheric conditions
-are not modelled. The FOV overlay is not a prediction of image quality.
+This is an observing planner, not a telescope controller. Times have 15-minute
+sampling; local obstructions are not modelled. The FOV overlay is not a
+prediction of image quality.
+
+Cloud cover is fetched from Open-Meteo (open-meteo.com, CC BY 4.0) and drawn on
+the night chart when available. It needs internet, reaches about 16 days ahead,
+and is NOT part of the 0-100 score, which stays purely astronomical. It is a
+third-party forecast, not a measurement of your sky.

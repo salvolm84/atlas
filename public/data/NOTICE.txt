@@ -24,6 +24,12 @@ https://science.nasa.gov/mission/hubble/science/explore-the-night-sky/hubble-cal
 Astronomy Engine 2.1.19, Don Cross, MIT license.
 https://github.com/cosinekitty/astronomy
 
+Cloud forecasts from Open-Meteo, https://open-meteo.com/
+Licensed CC BY 4.0: https://creativecommons.org/licenses/by/4.0/
+Requested without an API key. Only a latitude and longitude rounded to two
+decimal places, and the requested dates, leave the browser. The forecast is
+displayed beside the astronomy and is not an input to the 0-100 score.
+
 DSS2 photographs from STScI, accessed via CDS HiPS2FITS.
 This work makes use of hips2fits, a service provided by CDS.
 https://alasky.cds.unistra.fr/hips-image-services/hips2fits
