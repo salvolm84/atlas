@@ -2,7 +2,6 @@
 import { useMemo, useState, useDeferredValue } from "react";
 import {
   Orbit,
-  MapPin,
   Moon,
   Search,
   ArrowUpRight,
@@ -34,15 +33,18 @@ import {
 } from "@/lib/sky";
 import { Choice } from "./choice";
 import { ObjectDetails } from "./object-details";
+import { SitePicker } from "./site-picker";
 export default function Atlas({
   initialDate,
   localMode = false,
-  site = MODENA,
+  initialSite = MODENA,
 }: {
   initialDate: string;
   localMode?: boolean;
-  site?: Site;
+  initialSite?: Site;
 }) {
+  // Deliberately not persisted: the atlas opens at Modena every time.
+  const [site, setSite] = useState<Site>(initialSite);
   const [sector, setSector] = useState<Sector>({ start: 0, span: 360 });
   const [day, setDay] = useState(initialDate),
     [dateOpen, setDateOpen] = useState(false),
@@ -146,14 +148,7 @@ export default function Atlas({
           </a>
           <a href="#method">Method and sources</a>
         </nav>
-        <span className="location">
-          <MapPin size={15} />
-          {site.name}{" "}
-          <small>
-            {fmt(Math.abs(site.latitude), 2)}° {site.latitude >= 0 ? "N" : "S"} ·{" "}
-            {fmt(Math.abs(site.longitude), 2)}° {site.longitude >= 0 ? "E" : "W"}
-          </small>
-        </span>
+        <SitePicker site={site} onChange={setSite} />
       </header>
       <div className="atlas-workspace">
         <div className="atlas-intro">

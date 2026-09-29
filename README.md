@@ -1,8 +1,8 @@
-# Deep Sky Atlas · Modena
+# Deep Sky Atlas
 
 [![CI](https://github.com/salvolm84/atlas/actions/workflows/ci.yml/badge.svg)](https://github.com/salvolm84/atlas/actions/workflows/ci.yml)
 
-An English-language deep-sky atlas and astrophotography planner for **Modena, Italy**, with **248 catalogue entries**, Seestar field-of-view overlays and a circular horizon filter.
+An English-language deep-sky atlas and astrophotography planner with **248 catalogue entries**, Seestar field-of-view overlays and a circular horizon filter. It defaults to **Modena, Italy** and can observe from any location you give it.
 
 Choose a night, select your telescope and mark the part of the sky you can see. The atlas ranks targets using darkness, altitude, available observing time, Moon conditions and apparent size.
 
@@ -69,6 +69,7 @@ pnpm format:check         # verify formatting without writing
 pnpm lint                 # ESLint
 pnpm exec tsc --noEmit    # TypeScript validation
 pnpm test:astronomy       # catalogue, dates, geometry and horizon regression checks
+pnpm test:site            # observing-location parsing and bounds
 pnpm build:portable       # generate directly openable HTML in release-runtime/
 python3 scripts/package-release.py  # create versioned ZIP and SHA-256 checksums
 ```
@@ -87,8 +88,9 @@ The existing `pnpm build` / `pnpm start` scripts target the original hosted Work
 | `app/object-details.tsx` | Selected object panel: facts, night window and seasonality charts |
 | `app/fov-view.tsx` | Seestar field-of-view simulator over the survey image |
 | `app/choice.tsx` | Shared labelled `Select` used by the controls |
+| `app/site-picker.tsx` | Observing-location picker: geolocation and manual coordinates |
 | `app/horizon.tsx` | Circular horizon selector and direction-by-time table |
-| `lib/sky.ts` | Astronomy, Modena observer, telescope specifications and scoring |
+| `lib/sky.ts` | Astronomy, the `Site` type, telescope specifications and scoring |
 | `lib/framing.ts` | Frame-fit geometry, independent of React |
 | `components/error-boundary.tsx` | Keeps a render failure from blanking the offline page |
 | `app/globals.css` | Shared visual styles and responsive layouts |
@@ -100,7 +102,9 @@ The existing `pnpm build` / `pnpm start` scripts target the original hosted Work
 | `scripts/package-release.py` | Archive runtime plus corresponding editable source |
 | `scripts/verify-sky.cjs` | Astronomical and horizon regression checks |
 
-This version has no location selector. Latitude-dependent visibility now derives from `observer` through `transitAltitude` and `neverRises` in `lib/sky.ts`, so changing the observing location means editing `observer`, the `Europe/Rome` time zone used by `localTime`, `clock` and `romeDate`, and the Modena labels in the interface. UI selections are not persisted between sessions.
+Click the location in the header to change the observing site: use the browser's current position, or type a latitude, longitude, elevation and time zone. Modena is the default and the atlas returns to it on every reload — **no selection is persisted**, by design.
+
+A `Site` carries the coordinates and an IANA time zone, and travels through `makeNight`, `targetNight`, `seasonal`, `transitAltitude` and `neverRises` in `lib/sky.ts`. Nights are cached per site and date, so the same date at two locations cannot collide. Adding a preset means adding a `Site`; nothing else is latitude-specific.
 
 ### Rebuild the catalogue
 
@@ -114,7 +118,7 @@ Review provenance and licensing before adding another data source. The generatio
 
 ## Astronomy and interpretation
 
-- Observer: **44.6471° N, 10.9252° E, 34 m**, Modena; time zone `Europe/Rome`.
+- Default observer: **44.6471° N, 10.9252° E, 34 m**, Modena; time zone `Europe/Rome`. Any other location can be entered at runtime, and all times follow that site's time zone.
 - Astronomy Engine precesses J2000 coordinates to the observing date. Sun and Moon use topocentric coordinates; horizon altitudes are geometric.
 - The night is sampled every **15 minutes**. Reported window boundaries are approximate to that cadence and may differ from a dedicated planner’s interpolated times.
 - Darkness means **Sun below −18°**. Lunar illumination is evaluated at local midnight. The ranking also considers Moon presence and angular separation during useful samples.

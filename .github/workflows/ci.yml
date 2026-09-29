@@ -51,6 +51,9 @@ jobs:
       - name: Astronomy and horizon regression checks
         run: pnpm test:astronomy
 
+      - name: Observing-location input checks
+        run: pnpm test:site
+
       # The artifact people actually download. Must build on every change.
       - name: Portable release build
         run: pnpm build:portable

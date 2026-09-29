@@ -8,6 +8,7 @@
   "scripts": {
     "build:portable": "node scripts/build-portable.mjs",
     "test:astronomy": "node scripts/verify-sky.cjs",
+    "test:site": "node scripts/verify-site.cjs",
     "install:ci": "bash scripts/install-pnpm.sh",
     "dev": "node scripts/run-framework.mjs dev",
     "build": "node scripts/run-framework.mjs build",
