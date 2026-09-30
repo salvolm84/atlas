@@ -38,6 +38,7 @@ import {
 import { Choice } from "./choice";
 import { ObjectDetails } from "./object-details";
 import { FRAME_COLORS, type Framed } from "./fov-view";
+import { frameFill } from "@/lib/framing";
 import { SitePicker } from "./site-picker";
 import { useDetail, useRanked, useSolver } from "@/hooks/use-solver";
 import { toSolverObject, type NightParams } from "@/lib/solver-types";
@@ -204,6 +205,9 @@ export default function Atlas({
     setDay(d);
     setDateOpen(false);
   }
+  // Share of the scoring telescope's frame the object covers, by area.
+  const fillOf = (o: (typeof objects)[number]) => frameFill(o, scope);
+  const fillText = (x: number) => (x < 0.01 ? "<1%" : fmt(x * 100, 0) + "%");
   const choose = (id: string) => {
     setSelected(id);
     if (window.innerWidth < 1000)
@@ -430,6 +434,11 @@ export default function Atlas({
                             ? "Never rises here"
                             : "Outside window"}
                         {r.o.mag !== null ? " · mag " + fmt(r.o.mag, 1) : ""}
+                        {fillOf(r.o) !== null && (
+                          <span className={fillOf(r.o)! > 1 ? "fill over" : "fill"}>
+                            {" · fills " + fillText(fillOf(r.o)!)}
+                          </span>
+                        )}
                       </small>
                     </span>
                     <span className="row-score">
@@ -441,9 +450,12 @@ export default function Atlas({
               )}
             </div>
             <p className="catalog-footnote">
-              The catalogues also include clusters: choose “All types” to browse them. C14 has two
-              components. Objects that never rise at your location are left out of the nightly
-              suggestions only, not the catalogue.
+              “Fills” is the object&apos;s catalogued area as a share of the {instrument.maker}{" "}
+              {instrument.name} frame; over 100% it is larger than one frame. It is area only, so a
+              long object can fill less than 100% and still not fit. The catalogues also include
+              clusters: choose “All types” to browse them. C14 has two components. Objects that
+              never rise at your location are left out of the nightly suggestions only, not the
+              catalogue.
             </p>
           </aside>
           <div id="object-detail">

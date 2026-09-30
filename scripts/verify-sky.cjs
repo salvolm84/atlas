@@ -143,6 +143,13 @@ assert.equal(framing.frameFit({ major: null, minor: null, pa: 0 }, "s50pro", 0),
 assert.equal(typeof framing.frameFit(m31, "s50pro", 0), "boolean");
 // M31 is about 190' across, far wider than the S50's 1.38 x 2.45 degree frame.
 assert.equal(framing.frameFit(m31, "s50pro", 0), false);
+// Fill is ellipse area over frame area: M31 covers about three quarters of the
+// S50 Pro frame by area yet still does not fit, being longer than the frame.
+assert.equal(framing.frameFill({ major: null, minor: null, pa: 0 }, "s50pro"), null);
+assert(Math.abs(framing.frameFill(m31, "s50pro") - 0.752) < 0.005);
+// A 1° disc is π/4 square degrees over the frame's 1.38° × 2.454°.
+const disc = { major: 60, minor: 60, pa: 0 };
+assert(Math.abs(framing.frameFill(disc, "s50pro") - Math.PI / 4 / (1.38 * 2.454)) < 0.002);
 const north = { start: 315, span: 90 },
   south = { start: 135, span: 90 };
 for (const a of [315, 350, 0, 45]) assert(s.inSector(a, north));

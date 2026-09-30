@@ -15,3 +15,14 @@ export function frameFit(o: DSO, scope: ScopeId, angle: number) {
     2 * Math.sqrt(a * a * Math.cos(t) ** 2 + b * b * Math.sin(t) ** 2) <= f.height
   );
 }
+
+/**
+ * Share of the native frame's area covered by the catalogued ellipse: 0.5 is
+ * half the frame, 1.2 an object 20% larger than one frame. Area only, so an
+ * elongated object can stay under 1 and still not fit. Null without dimensions.
+ */
+export function frameFill(o: DSO, scope: ScopeId) {
+  if (!o.major || !o.minor) return null;
+  const f = fov(scope);
+  return (Math.PI * (o.major / 60 / 2) * (o.minor / 60 / 2)) / (f.width * f.height);
+}
