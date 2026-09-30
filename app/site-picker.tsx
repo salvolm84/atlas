@@ -1,10 +1,11 @@
 "use client";
-import { useMemo, useState } from "react";
-import { LoaderCircle, MapPin, Navigation, RotateCcw } from "lucide-react";
+import { useMemo, useRef, useState } from "react";
+import { LoaderCircle, MapPin, Navigation, RotateCcw, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Choice } from "./choice";
 import { fmt, MODENA, siteKey, type Site } from "@/lib/sky";
+import { lookupZone, searchPlaces, type Place } from "@/lib/geocode";
 
 /** Coordinates as the header shows them: 44.65° N · 10.93° E. */
 export function coordinateLabel(site: Site) {
@@ -74,6 +75,11 @@ export function SitePicker({ site, onChange }: { site: Site; onChange: (s: Site)
   const [draft, setDraft] = useState<Draft>(() => toDraft(site));
   const [error, setError] = useState("");
   const [locating, setLocating] = useState(false);
+  const [query, setQuery] = useState("");
+  const [results, setResults] = useState<Place[] | null>(null);
+  // "search" while Nominatim answers; a place while its time zone is looked up.
+  const [busy, setBusy] = useState<"search" | Place | null>(null);
+  const pending = useRef<AbortController | null>(null);
   const zones = useMemo(() => timeZones(site.timeZone), [site.timeZone]);
 
   // Re-seed the form from the active site whenever the popover opens, so a
@@ -97,6 +103,72 @@ export function SitePicker({ site, onChange }: { site: Site; onChange: (s: Site)
     const { site: parsed, error: why } = parseDraft(draft, "Custom location", "custom");
     if (!parsed) return setError(why ?? "Check the values.");
     commit(parsed);
+  }
+
+  // One request at a time: a new search or pick cancels whatever is in flight.
+  function begin() {
+    pending.current?.abort();
+    pending.current = new AbortController();
+    return pending.current.signal;
+  }
+
+  async function search(event: React.FormEvent) {
+    event.preventDefault();
+    const text = query.trim();
+    if (!text) return;
+    const signal = begin();
+    setError("");
+    setResults(null);
+    setBusy("search");
+    try {
+      const found = await searchPlaces(text, signal);
+      setResults(found);
+      if (!found.length)
+        setError("No place matches. Try adding the town or country, or enter coordinates.");
+    } catch {
+      if (!signal.aborted)
+        setError(
+          "Place search is unavailable right now (offline?). Enter the coordinates instead.",
+        );
+    } finally {
+      if (!signal.aborted) setBusy(null);
+    }
+  }
+
+  async function pick(place: Place) {
+    const signal = begin();
+    setError("");
+    setBusy(place);
+    let zone: { timeZone: string | null; height: number | null } = {
+      timeZone: null,
+      height: null,
+    };
+    try {
+      zone = await lookupZone(place.latitude, place.longitude, signal);
+    } catch {
+      if (signal.aborted) return;
+    }
+    setBusy(null);
+    const next: Site = {
+      id: "search",
+      name: place.name,
+      latitude: place.latitude,
+      longitude: place.longitude,
+      height: zone.height ?? 0,
+      timeZone: zone.timeZone ?? draft.timeZone,
+    };
+    setDraft(toDraft(next));
+    if (!zone.timeZone) {
+      // Coordinates without the right zone would put every time off by hours,
+      // so stop here and let the zone be chosen by hand.
+      setError(
+        `Found ${place.name}, but its time zone could not be looked up. Choose it below, then use these coordinates.`,
+      );
+      return;
+    }
+    setResults(null);
+    setQuery("");
+    commit(next);
   }
 
   function locate() {
@@ -160,6 +232,51 @@ export function SitePicker({ site, onChange }: { site: Site; onChange: (s: Site)
               Modena when you reload.
             </p>
           </div>
+
+          <form className="grid gap-1 text-xs" onSubmit={search} role="search">
+            <label htmlFor="place-search">Find a city or address</label>
+            <div className="flex gap-2">
+              <Input
+                id="place-search"
+                type="search"
+                autoComplete="off"
+                placeholder="e.g. Asiago, or a street address"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+              />
+              <button
+                type="submit"
+                className="icon-btn shrink-0"
+                aria-label="Search for the place"
+                disabled={busy === "search"}
+              >
+                {busy === "search" ? (
+                  <LoaderCircle size={16} className="spin" />
+                ) : (
+                  <Search size={16} />
+                )}
+              </button>
+            </div>
+          </form>
+          {results?.length ? (
+            <ul className="place-results" aria-label="Matching places">
+              {results.map((p) => (
+                <li key={p.detail + p.latitude}>
+                  <button onClick={() => pick(p)} disabled={busy !== null}>
+                    <strong>
+                      {p.name}
+                      {busy === p ? <LoaderCircle size={13} className="spin" /> : null}
+                    </strong>
+                    <span>{p.detail}</span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          ) : null}
+          <p className="text-[11px] leading-4 text-slate-400">
+            Search by Nominatim, © OpenStreetMap contributors. Time zone and elevation from
+            Open-Meteo.
+          </p>
 
           <button className="date-button" onClick={locate} disabled={locating}>
             {locating ? <LoaderCircle size={16} className="spin" /> : <Navigation size={16} />}

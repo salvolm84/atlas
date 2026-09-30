@@ -35,14 +35,57 @@ const sky = load("../lib/sky.ts");
 // The picker pulls in Radix and lucide for its markup; none of that is needed
 // to exercise the parsing, so the UI imports are stubbed out.
 const stub = new Proxy({}, { get: () => () => null });
+const geocode = load("../lib/geocode.ts");
 const picker = load("../app/site-picker.tsx", {
-  react: { useMemo: () => [], useState: (v) => [typeof v === "function" ? v() : v, () => {}] },
+  react: {
+    useMemo: () => [],
+    useRef: (v) => ({ current: v }),
+    useState: (v) => [typeof v === "function" ? v() : v, () => {}],
+  },
   "lucide-react": stub,
   "@/components/ui/input": stub,
   "@/components/ui/popover": stub,
   "./choice": stub,
   "@/lib/sky": sky,
+  "@/lib/geocode": geocode,
 });
+
+// Place search: Nominatim results become a short header name and rounded
+// coordinates; a result without usable coordinates is dropped.
+{
+  const city = geocode.toPlace({
+    lat: "-33.8698439",
+    lon: "151.2082848",
+    name: "Sydney",
+    display_name: "Sydney, New South Wales, Australia",
+    address: { city: "Sydney", state: "New South Wales", country: "Australia" },
+  });
+  assert.deepEqual(city, {
+    name: "Sydney, Australia",
+    detail: "Sydney, New South Wales, Australia",
+    latitude: -33.8698,
+    longitude: 151.2083,
+  });
+  const house = geocode.toPlace({
+    lat: "44.6433022",
+    lon: "10.9339848",
+    name: "",
+    display_name: "1, Via Emilia Est, Musicisti, Modena, Emilia-Romagna, 41121, Italy",
+    address: { house_number: "1", road: "Via Emilia Est", city: "Modena", country: "Italy" },
+  });
+  assert.equal(house.name, "Via Emilia Est 1, Modena, Italy");
+  assert.equal(geocode.toPlace({ lat: "x", lon: "1", display_name: "Nowhere" }), null);
+  // The zone must be one the browser can format with, or it is refused.
+  const known = (z) => z === "Australia/Sydney";
+  assert.deepEqual(geocode.toZone({ timezone: "Australia/Sydney", elevation: 69.4 }, known), {
+    timeZone: "Australia/Sydney",
+    height: 69,
+  });
+  assert.deepEqual(geocode.toZone({ timezone: "Mars/Olympus", elevation: "high" }, known), {
+    timeZone: null,
+    height: null,
+  });
+}
 
 const { parseDraft } = picker;
 const ok = { latitude: "44.6471", longitude: "10.9252", height: "34", timeZone: "Europe/Rome" };

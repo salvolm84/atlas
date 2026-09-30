@@ -32,6 +32,12 @@ Requested without an API key. Only a latitude and longitude rounded to two
 decimal places, and the requested dates, leave the browser. The forecast is
 displayed beside the astronomy and is not an input to the 0-100 score.
 
+Place search by Nominatim, https://nominatim.openstreetmap.org/
+Data (c) OpenStreetMap contributors, ODbL 1.0: https://www.openstreetmap.org/copyright
+Only the text typed into the location search is sent, and only when Search
+is pressed. The time zone and elevation of the chosen place come from
+Open-Meteo (above), from coordinates rounded to two decimal places.
+
 Object descriptions from English Wikipedia, https://en.wikipedia.org/
 Text licensed CC BY-SA 4.0: https://creativecommons.org/licenses/by-sa/4.0/
 Fetched live for the selected object only and shown with a link to its
