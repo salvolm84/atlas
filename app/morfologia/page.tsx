@@ -12,6 +12,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { ThemeToggle } from "../theme-toggle";
+import { appVersion, builtOn } from "@/lib/build-info";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 type Galaxy = {
@@ -431,7 +432,10 @@ export default function Home() {
             A visual atlas for curious astrophotographers · by{" "}
             <b className="font-medium text-slate-300">Salvatore La Malfa</b>
           </p>
-          <p>Rounded figures · images credited to their respective missions.</p>
+          <p>
+            Rounded figures · images credited to their respective missions · version {appVersion},
+            built on {builtOn}
+          </p>
         </div>
       </footer>
     </main>

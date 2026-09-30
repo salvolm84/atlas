@@ -4,6 +4,7 @@ import { readFile, writeFile, mkdir, cp, readdir } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { buildInfo } from "./build-info.mjs";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const out = path.join(root, "release-runtime");
@@ -28,7 +29,7 @@ await build({
     },
   ],
   resolve: { alias: { "@": root } },
-  define: { "process.env.NODE_ENV": JSON.stringify("production") },
+  define: { "process.env.NODE_ENV": JSON.stringify("production"), ...buildInfo() },
   build: {
     outDir: out,
     emptyOutDir: true,

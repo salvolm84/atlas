@@ -39,6 +39,7 @@ import { Choice } from "./choice";
 import { ObjectDetails } from "./object-details";
 import { FRAME_COLORS, type Framed } from "./fov-view";
 import { frameFill } from "@/lib/framing";
+import { appVersion, builtOn } from "@/lib/build-info";
 import { SitePicker } from "./site-picker";
 import { ThemeToggle } from "./theme-toggle";
 import { useDetail, useRanked, useSolver } from "@/hooks/use-solver";
@@ -570,6 +571,9 @@ export default function Atlas({
       <footer className="atlas-footer">
         <span>
           Deep Sky Atlas · by <b>Salvatore La Malfa</b>
+        </span>
+        <span>
+          Version {appVersion} · built on {builtOn}
         </span>
         <span>
           Explore, frame, pick your night. ·{" "}
