@@ -138,7 +138,7 @@ export default function Atlas({
     () => ({ day, site, minAlt: Number(minAlt), scope, sector: nightSector }),
     [day, site, minAlt, scope, nightSector],
   );
-  const rankRows = useRanked(solver, params);
+  const { rows: rankRows, pending: rankPending } = useRanked(solver, params);
   const ranked = useMemo(
     () =>
       rankRows
@@ -151,7 +151,7 @@ export default function Atlas({
         ) ?? null,
     [rankRows, byId],
   );
-  const solving = ranked === null;
+  const solving = ranked === null || rankPending;
   const filtered = useMemo(() => {
     // Normalise the query once, not once per catalogue entry.
     const q = query
@@ -161,9 +161,12 @@ export default function Atlas({
       .replace(/\s/g, "");
     return (ranked ?? []).filter((r) => {
       const o = r.o;
+      // The night and sector tests never drop the selected object: picking a
+      // poor night from its outlook must not swap the panel to another object.
+      // Catalogue, type and search are the reader's own filters and still apply.
       return (
-        (mode !== "night" || r.score > 0) &&
-        (sectorSpan === 360 || r.hours >= 0.5) &&
+        (o.id === selected ||
+          ((mode !== "night" || r.score > 0) && (sectorSpan === 360 || r.hours >= 0.5))) &&
         (catalog === "all" ||
           (catalog === "M" && o.messier) ||
           (catalog === "C" && o.caldwell) ||
@@ -175,7 +178,7 @@ export default function Atlas({
           [o.name, o.kind, ...o.aliases].join(" ").toLowerCase().replace(/\s/g, "").includes(q))
       );
     });
-  }, [ranked, mode, catalog, type, query, sectorSpan]);
+  }, [ranked, mode, catalog, type, query, sectorSpan, selected]);
   const rows =
     mode === "catalog"
       ? [...filtered].sort((a, b) => objects.indexOf(a.o) - objects.indexOf(b.o))
@@ -380,7 +383,9 @@ export default function Atlas({
               <span>
                 {solving
                   ? "Computing\u2026"
-                  : `${rows.length} objects ${mode === "night" ? "usable" : "listed"}`}
+                  : mode === "night"
+                    ? `${rows.filter((r) => r.score > 0).length} objects usable`
+                    : `${rows.length} objects listed`}
               </span>
               <span>{mode === "night" ? "By suitability ↓" : "By catalogue"}</span>
             </div>

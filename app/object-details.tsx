@@ -212,7 +212,7 @@ function ObjectPanel({
           onScoreWith={onScoreWith}
         />
       </ErrorBoundary>
-      <section className="night-detail">
+      <section className="night-detail" id="night-chart">
         <div className="section-heading">
           <div>
             <p className="eyebrow">
@@ -388,7 +388,15 @@ function ObjectPanel({
                   (night.promising ? " promising" : "") +
                   (night.hours === 0 ? " unusable" : "")
                 }
-                onClick={() => onPickDate(night.day)}
+                onClick={() => {
+                  onPickDate(night.day);
+                  // The chart for the picked night sits above the outlook; bring
+                  // it into view only when it has scrolled off the top. The page's
+                  // scroll-behavior decides smooth or instant (reduced motion).
+                  const chart = document.getElementById("night-chart");
+                  if (chart && chart.getBoundingClientRect().top < 0)
+                    chart.scrollIntoView({ block: "start" });
+                }}
                 aria-pressed={selected}
                 aria-label={
                   `${night.day}: ` +
