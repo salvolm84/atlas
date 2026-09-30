@@ -69,7 +69,7 @@ export function ObjectDetails(props: PanelProps) {
             <h2>{props.o.name}</h2>
           </div>
         </header>
-        <p className="caption">Computing tonight&apos;s window\u2026</p>
+        <p className="caption">Computing tonight&apos;s window…</p>
       </article>
     );
   return <ObjectPanel {...props} detail={props.detail} />;
@@ -350,7 +350,7 @@ function ObjectPanel({
                     : "No clear night forecast for " + o.key}
             </h3>
           </div>
-          <span className="tag">Threshold {minAlt}\u00b0</span>
+          <span className="tag">Threshold {minAlt}°</span>
         </div>
         <div className="outlook-grid">
           {nights.map((night) => {
@@ -396,7 +396,7 @@ function ObjectPanel({
         <p className="caption">
           Useful hours come from the same altitude, darkness and sector filters as the list; mean
           cloud is the forecast across those hours only. The two are reported side by side and never
-          combined \u2014 pick the night yourself. Select a night to plan it.
+          combined — pick the night yourself. Select a night to plan it.
           {outlook.state === "unavailable" ? " " + outlook.reason : ""}
         </p>
       </section>

@@ -282,10 +282,22 @@ export function DirectionDetails({ r, site }: { r: TargetNight; site: Site }) {
           <table>
             <thead>
               <tr>
-                <th>Local time</th>
-                <th>Direction</th>
-                <th>Azimuth</th>
-                <th>Altitude</th>
+                <th>
+                  <span className="wide-only">Local time</span>
+                  <span className="narrow-only">Time</span>
+                </th>
+                <th>
+                  <span className="wide-only">Direction</span>
+                  <span className="narrow-only">Dir.</span>
+                </th>
+                <th>
+                  <span className="wide-only">Azimuth</span>
+                  <span className="narrow-only">Az.</span>
+                </th>
+                <th>
+                  <span className="wide-only">Altitude</span>
+                  <span className="narrow-only">Alt.</span>
+                </th>
                 <th>Imaging</th>
               </tr>
             </thead>
@@ -297,7 +309,10 @@ export function DirectionDetails({ r, site }: { r: TargetNight; site: Site }) {
                   <td>{fmt(p.az, 0)}°</td>
                   <td>{fmt(p.alt, 0)}°</td>
                   <td>
-                    {p.usable ? "In sector, above threshold" : "Outside sector / below threshold"}
+                    <span className="wide-only">
+                      {p.usable ? "In sector, above threshold" : "Outside sector / below threshold"}
+                    </span>
+                    <span className="narrow-only">{p.usable ? "Usable" : "Not usable"}</span>
                   </td>
                 </tr>
               ))}
