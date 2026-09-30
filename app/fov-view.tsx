@@ -34,7 +34,7 @@ export function FovView({ o, scope }: { o: DSO; scope: ScopeId }) {
       <div className="section-heading">
         <div>
           <p className="eyebrow">Field simulator</p>
-          <h3>Your Seestar, on the real sky</h3>
+          <h3>Your telescope, on the real sky</h3>
         </div>
         <span className="tag">DSS2 · optical</span>
       </div>
@@ -182,14 +182,14 @@ export function FovView({ o, scope }: { o: DSO; scope: ScopeId }) {
         <b>{fmt(f.scale, 2)}″/px</b>
       </div>
       <p className="caption">
-        Cyan: the native sensor, in portrait orientation. Yellow: the ellipse of the catalogued
-        dimensions, not the exact edge of the nebulosity. North is up and east is left; PA runs from
-        north towards east. The rotation is geometric, not a command to the telescope. On an alt-az
-        mount the field rotates; crops and mosaics are not simulated.
+        Cyan: the native sensor frame. Yellow: the ellipse of the catalogued dimensions, not the
+        exact edge of the nebulosity. North is up and east is left; PA runs from north towards east.
+        The rotation is geometric, not a command to the telescope. On an alt-az mount the field
+        rotates; crops and mosaics are not simulated.
       </p>
       <p className="caption">
         DSS2/STScI via CDS HiPS2FITS: survey photographs, not a prediction of the detail, colour or
-        noise a Seestar will achieve.{" "}
+        noise your telescope will achieve.{" "}
         <a href={url} target="_blank" rel="noreferrer">
           Open survey ↗
         </a>

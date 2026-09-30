@@ -263,7 +263,7 @@ export default function Home() {
             <div className="absolute inset-x-0 top-0 flex items-start justify-between gap-4 p-5 sm:p-7">
               <span className="classification-badge">{selected.code}</span>
               <a className="source-link" href={selected.source} target="_blank" rel="noreferrer">
-                Fonte immagine <ArrowUpRight aria-hidden="true" />
+                Image source <ArrowUpRight aria-hidden="true" />
               </a>
             </div>
             <div className="absolute inset-x-0 bottom-0 p-5 sm:p-8 lg:p-10">
@@ -349,27 +349,27 @@ export default function Home() {
           >
             <div className="hubble-node hubble-start">
               <strong>E0–E7</strong>
-              <span>Ellittiche</span>
+              <span>Ellipticals</span>
             </div>
             <div className="hubble-fork" aria-hidden="true" />
             <div className="hubble-branch">
               <div className="hubble-node">
                 <strong>S0</strong>
-                <span>Lenticolari</span>
+                <span>Lenticulars</span>
               </div>
               <div className="hubble-node">
                 <strong>Sa → Sc</strong>
-                <span>Spirali</span>
+                <span>Spirals</span>
               </div>
             </div>
             <div className="hubble-branch">
               <div className="hubble-node">
                 <strong>S0</strong>
-                <span>Lenticolari</span>
+                <span>Lenticulars</span>
               </div>
               <div className="hubble-node">
                 <strong>SBa → SBc</strong>
-                <span>Barrate</span>
+                <span>Barred spirals</span>
               </div>
             </div>
           </div>
@@ -425,7 +425,10 @@ export default function Home() {
 
       <footer className="relative z-10 border-t border-white/10 px-5 py-7 sm:px-8 lg:px-12">
         <div className="mx-auto flex max-w-[1500px] flex-col gap-2 text-sm text-slate-500 sm:flex-row sm:items-center sm:justify-between">
-          <p>A visual atlas for curious astrophotographers.</p>
+          <p>
+            A visual atlas for curious astrophotographers · by{" "}
+            <b className="font-medium text-slate-300">Salvatore La Malfa</b>
+          </p>
           <p>Rounded figures · images credited to their respective missions.</p>
         </div>
       </footer>

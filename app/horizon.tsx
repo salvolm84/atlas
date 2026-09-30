@@ -266,7 +266,7 @@ export function DirectionDetails({ r, site }: { r: TargetNight; site: Site }) {
           <p className="eyebrow">Where to look</p>
           <h3>Direction through the night</h3>
         </div>
-        <span className="tag">N · E · S · O</span>
+        <span className="tag">N · E · S · W</span>
       </div>
       <p>
         {r.hours > 0

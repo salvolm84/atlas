@@ -33,10 +33,28 @@ for (const o of s.objects) {
   assert(Math.abs(o.dec) <= 90);
   if (o.messier || o.caldwell) assert(o.distance > 0, o.key);
 }
-assert(Math.abs(s.fov("s30").width - 2.243) < 0.01);
-assert(Math.abs(s.fov("s30").height - 3.986) < 0.01);
-assert(Math.abs(s.fov("s50").width - 1.38) < 0.01);
-assert(Math.abs(s.fov("s50").height - 2.454) < 0.01);
+assert(Math.abs(s.fov("s30pro").width - 2.243) < 0.01);
+assert(Math.abs(s.fov("s30pro").height - 3.986) < 0.01);
+assert(Math.abs(s.fov("s50pro").width - 1.38) < 0.01);
+assert(Math.abs(s.fov("s50pro").height - 2.454) < 0.01);
+// Every other model is checked against the field its maker publishes, so a typo in
+// the telescope table fails here rather than silently mis-framing every object.
+// Makers round to 0.1° (Vaonis truncates the Vespera 3's 1.465° to 1.4°).
+for (const [id, width, height] of [
+  ["s50", 0.73, 1.29],
+  ["dwarf3", 2.93, 1.65],
+  ["vespera2", 2.5, 1.4],
+  ["vespera3", 2.6, 1.4],
+  ["vesperapro", 1.6, 1.6],
+  ["vesperapro2", 1.6, 1.6],
+  ["odyssey", 45 / 60, 33.6 / 60],
+  ["evscope2", 45.6 / 60, 34.2 / 60],
+  ["origin", 1.27, 0.85],
+  ["origin2", 1.32, 0.75],
+]) {
+  const f = s.fov(id);
+  assert(Math.abs(f.width - width) < 0.07 && Math.abs(f.height - height) < 0.07, id);
+}
 assert.equal(s.localTime("2026-03-28", 12, MODENA).toISOString(), "2026-03-28T11:00:00.000Z");
 assert.equal(s.localTime("2026-03-29", 12, MODENA).toISOString(), "2026-03-29T10:00:00.000Z");
 assert.equal(s.localTime("2026-10-25", 12, MODENA).toISOString(), "2026-10-25T11:00:00.000Z");
@@ -121,10 +139,10 @@ for (const o of s.objects.filter((o) => s.neverRises(o.dec, MODENA))) {
 // Framing geometry moved to lib/framing.ts; check it still loads and agrees.
 const framing = load("../lib/framing.ts", { "./sky": s });
 const m31 = s.objects.find((o) => o.messier === 31);
-assert.equal(framing.frameFit({ major: null, minor: null, pa: 0 }, "s50", 0), null);
-assert.equal(typeof framing.frameFit(m31, "s50", 0), "boolean");
+assert.equal(framing.frameFit({ major: null, minor: null, pa: 0 }, "s50pro", 0), null);
+assert.equal(typeof framing.frameFit(m31, "s50pro", 0), "boolean");
 // M31 is about 190' across, far wider than the S50's 1.38 x 2.45 degree frame.
-assert.equal(framing.frameFit(m31, "s50", 0), false);
+assert.equal(framing.frameFit(m31, "s50pro", 0), false);
 const north = { start: 315, span: 90 },
   south = { start: 135, span: 90 };
 for (const a of [315, 350, 0, 45]) assert(s.inSector(a, north));
@@ -162,13 +180,13 @@ assert(s.inSector(180, { start: 180, span: 360 }));
     assert(next.span >= 5 && next.span <= 360);
   }
 }
-assert.equal(s.targetNight(m42, winter, 30, "s50", north).hours, 0);
-const southResult = s.targetNight(m42, winter, 30, "s50", south);
+assert.equal(s.targetNight(m42, winter, 30, "s50pro", north).hours, 0);
+const southResult = s.targetNight(m42, winter, 30, "s50pro", south);
 assert(southResult.hours > 0);
 assert(southResult.hours <= s.targetNight(m42, winter).hours);
 assert(Math.abs(southResult.peakAz - 180) < 10);
 for (const sector of [north, south, { start: 270, span: 180 }])
-  for (const r of s.objects.map((o) => s.targetNight(o, winter, 30, "s50", sector))) {
+  for (const r of s.objects.map((o) => s.targetNight(o, winter, 30, "s50pro", sector))) {
     for (const p of r.curve.filter((p) => p.usable))
       assert(s.inSector(p.az, sector) && p.alt >= 30 && p.sun < -18);
     // Boundaries are interpolated, so the sample count only brackets the
@@ -262,8 +280,8 @@ console.log(
     {
       passed: true,
       objects: s.objects.length,
-      fov30: s.fov("s30"),
-      fov50: s.fov("s50"),
+      fov30: s.fov("s30pro"),
+      fov50: s.fov("s50pro"),
       m42WinterHours: s.targetNight(m42, winter).hours,
       m42SummerHours: s.targetNight(m42, summer).hours,
       winterDarkHours: winter.dark.length / 4,

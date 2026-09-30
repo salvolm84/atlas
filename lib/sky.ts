@@ -86,8 +86,25 @@ export const MONTHS = [
   "Dec",
 ];
 export const DEG = Math.PI / 180;
+// Native single-frame output of each main (telephoto) camera, width × height as the
+// camera delivers it: Seestars shoot portrait, the others landscape. Where a maker
+// omits the pixel pitch it is the sensor's datasheet value, which reproduces the
+// advertised field. The Odyssey's output size is unpublished; 2880 × 2160 is the
+// 4:3 crop of the IMX415 that reproduces Unistellar's 45′ × 33.6′.
 export const scopes = {
   s30: {
+    maker: "ZWO",
+    name: "Seestar S30",
+    aperture: 30,
+    focal: 150,
+    pixel: 2.9,
+    width: 1080,
+    height: 1920,
+    sensor: "Sony IMX662",
+    source: "https://www.seestar.com/products/seestar-s30-all-in-one-smart-telescope",
+  },
+  s30pro: {
+    maker: "ZWO",
     name: "Seestar S30 Pro",
     aperture: 30,
     focal: 160,
@@ -98,6 +115,18 @@ export const scopes = {
     source: "https://www.seestar.com/products/seestar-s30-pro",
   },
   s50: {
+    maker: "ZWO",
+    name: "Seestar S50",
+    aperture: 50,
+    focal: 250,
+    pixel: 2.9,
+    width: 1080,
+    height: 1920,
+    sensor: "Sony IMX462",
+    source: "https://www.seestar.com/products/seestar-s50",
+  },
+  s50pro: {
+    maker: "ZWO",
     name: "Seestar S50 Pro",
     aperture: 50,
     focal: 260,
@@ -106,6 +135,128 @@ export const scopes = {
     height: 3840,
     sensor: "OmniVision OS08B10",
     source: "https://www.seestar.com/products/seestar-s50-pro-smart-telescope",
+  },
+  dwarfmini: {
+    maker: "DwarfLab",
+    name: "DWARF mini",
+    aperture: 30,
+    focal: 150,
+    pixel: 2.9,
+    width: 1920,
+    height: 1080,
+    sensor: "Sony IMX662",
+    source: "https://www.dwarflab.com/us/products/dwarf-mini-smart-telescope",
+  },
+  dwarf2: {
+    maker: "DwarfLab",
+    name: "DWARF II",
+    aperture: 24,
+    focal: 100,
+    pixel: 1.45,
+    width: 3840,
+    height: 2160,
+    sensor: "Sony IMX415",
+    source: "https://www.dwarflab.com/us/products/dwarf-2-smart-telescope",
+  },
+  dwarf3: {
+    maker: "DwarfLab",
+    name: "DWARF 3",
+    aperture: 35,
+    focal: 150,
+    pixel: 2,
+    width: 3840,
+    height: 2160,
+    sensor: "Sony IMX678",
+    source: "https://help.dwarflab.com/en/docs/DWARF-3-Unboxing-and-Quick-Setup",
+  },
+  vespera2: {
+    maker: "Vaonis",
+    name: "Vespera II",
+    aperture: 50,
+    focal: 250,
+    pixel: 2.9,
+    width: 3840,
+    height: 2160,
+    sensor: "Sony IMX585",
+    source: "https://vaonis.com/pages/product/vespera-ii",
+  },
+  vespera3: {
+    maker: "Vaonis",
+    name: "Vespera 3",
+    aperture: 50,
+    focal: 245,
+    pixel: 2.9,
+    width: 3840,
+    height: 2160,
+    sensor: "Sony IMX585",
+    source: "https://vaonis.com/vespera-pro",
+  },
+  vesperapro: {
+    maker: "Vaonis",
+    name: "Vespera Pro",
+    aperture: 50,
+    focal: 250,
+    pixel: 2,
+    width: 3536,
+    height: 3536,
+    sensor: "Sony IMX676",
+    source: "https://vaonis.com/products/vespera-pro",
+  },
+  vesperapro2: {
+    maker: "Vaonis",
+    name: "Vespera Pro 2",
+    aperture: 50,
+    focal: 245,
+    pixel: 2,
+    width: 3536,
+    height: 3536,
+    sensor: "Sony IMX676",
+    source: "https://vaonis.com/products/vespera-pro2",
+  },
+  odyssey: {
+    maker: "Unistellar",
+    name: "Odyssey / Odyssey Pro",
+    aperture: 85,
+    focal: 320,
+    pixel: 1.45,
+    width: 2880,
+    height: 2160,
+    sensor: "Sony IMX415",
+    source: "https://shop.unistellar.com/products/odyssey-pro",
+  },
+  evscope2: {
+    maker: "Unistellar",
+    name: "eVscope 2",
+    aperture: 114,
+    focal: 450,
+    pixel: 2.9,
+    width: 2048,
+    height: 1536,
+    sensor: "Sony IMX347",
+    source: "https://shop.unistellar.com/products/evscope-2",
+  },
+  origin: {
+    maker: "Celestron",
+    name: "Origin",
+    aperture: 152,
+    focal: 335,
+    pixel: 2.4,
+    width: 3096,
+    height: 2080,
+    sensor: "Sony IMX178",
+    source:
+      "https://www.celestron.com/products/celestron-origin-intelligent-home-observatory-12099-old-version",
+  },
+  origin2: {
+    maker: "Celestron",
+    name: "Origin Mark II",
+    aperture: 152,
+    focal: 335,
+    pixel: 2,
+    width: 3856,
+    height: 2180,
+    sensor: "Sony IMX678",
+    source: "https://www.celestron.com/products/celestron-origin-intelligent-home-observatory",
   },
 };
 export type ScopeId = keyof typeof scopes;
@@ -325,7 +476,7 @@ export function targetNight(
   o: DSO,
   n: Night,
   minAlt: number = 30,
-  scope: ScopeId = "s50",
+  scope: ScopeId = "s50pro",
   sector: Sector = { start: 0, span: 360 },
 ): TargetNight {
   // The night carries its own site, so the caller cannot pair a sky with the
@@ -424,7 +575,7 @@ export function seasonal(
 ) {
   return MONTHS.map((label, i) => {
     const night = makeNight(year + "-" + String(i + 1).padStart(2, "0") + "-15", site);
-    const result = targetNight(o, night, minAlt, "s50", sector);
+    const result = targetNight(o, night, minAlt, "s50pro", sector);
     return { label, month: i, hours: result.hours, peak: result.peak };
   });
 }

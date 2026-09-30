@@ -195,7 +195,7 @@ function ObjectPanel({
         the band; it is not an intrinsic luminosity. Distances and sizes are catalogue estimates.
       </p>
       <DirectionDetails r={r} site={site} />
-      <ErrorBoundary area="Il simulatore di campo" resetKey={o.id + scope}>
+      <ErrorBoundary area="The field simulator" resetKey={o.id + scope}>
         <FovView o={o} scope={scope} />
       </ErrorBoundary>
       <section className="night-detail">

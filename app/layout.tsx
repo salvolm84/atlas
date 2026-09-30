@@ -5,9 +5,10 @@ import { RegisterServiceWorker } from "./register-sw";
 export const metadata: Metadata = {
   title: "Deep Sky Atlas",
   description:
-    "Messier and Caldwell atlas with a Seestar S30 Pro and S50 Pro field-of-view simulator, a nightly observing planner and a cloud forecast.",
+    "Messier and Caldwell atlas with a smart-telescope field-of-view simulator (Seestar, DWARF, Vespera, Unistellar, Origin), a nightly observing planner and a cloud forecast.",
   manifest: "/manifest.webmanifest",
   applicationName: "Deep Sky Atlas",
+  authors: [{ name: "Salvatore La Malfa" }],
   appleWebApp: {
     capable: true,
     title: "Deep Sky",

@@ -42,7 +42,7 @@ const params = {
   day: "2026-01-15",
   site,
   minAlt: 30,
-  scope: "s50",
+  scope: "s50pro",
   sector: { start: 0, span: 360 },
 };
 const solverObjects = sky.objects.map(types.toSolverObject);

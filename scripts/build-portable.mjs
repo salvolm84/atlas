@@ -56,7 +56,7 @@ for (const [name, page] of [
 ]) {
   await writeFile(
     path.join(out, name),
-    `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Deep Sky Atlas</title><link rel="icon" href="./favicon.svg"><style>${css}</style></head><body data-page="${page}"><div id="root"></div><noscript>Enable JavaScript to use the atlas.</noscript><script>${js}</script></body></html>`,
+    `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="author" content="Salvatore La Malfa"><title>Deep Sky Atlas</title><link rel="icon" href="./favicon.svg"><style>${css}</style></head><body data-page="${page}"><div id="root"></div><noscript>Enable JavaScript to use the atlas.</noscript><script>${js}</script></body></html>`,
   );
 }
 // public/data carries only what a reader should be able to open: the

@@ -1,7 +1,7 @@
 {
   "name": "Deep Sky Atlas",
   "short_name": "Deep Sky",
-  "description": "Messier and Caldwell atlas with a Seestar field-of-view simulator, a nightly observing planner and a cloud forecast.",
+  "description": "Messier and Caldwell atlas with a smart-telescope field-of-view simulator, a nightly observing planner and a cloud forecast.",
   "id": "/",
   "start_url": "/",
   "scope": "/",

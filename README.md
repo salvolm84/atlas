@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/salvolm84/atlas/actions/workflows/ci.yml/badge.svg)](https://github.com/salvolm84/atlas/actions/workflows/ci.yml)
 
-An English-language deep-sky atlas and astrophotography planner with **248 catalogue entries**, Seestar field-of-view overlays and a circular horizon filter. It defaults to **Modena, Italy** and can observe from any location you give it.
+An English-language deep-sky atlas and astrophotography planner with **248 catalogue entries**, smart-telescope field-of-view overlays and a circular horizon filter. It defaults to **Modena, Italy** and can observe from any location you give it.
 
 Choose a night, select your telescope and mark the part of the sky you can see. The atlas ranks targets using darkness, altitude, available observing time, Moon conditions and apparent size.
 
@@ -39,7 +39,7 @@ None of this applies to the portable ZIP. Service workers require an `http(s)` o
 
 - All **110 Messier** and **109 Caldwell** catalogue designations, plus selected NGC, IC, Sharpless and Barnard objects. Catalogue overlaps are consolidated; Caldwell 14 retains its two components. The result is 248 entries, including clusters and a few other objects for catalogue completeness.
 - Distance, apparent magnitude and band, angular dimensions, J2000 coordinates, morphology and estimated average surface brightness where available. Unknown values remain explicitly unavailable.
-- **Seestar S30 Pro** and **Seestar S50 Pro** native-frame FOV simulation over DSS2 survey images, with geometric rotation and map zoom.
+- Native-frame FOV simulation for 15 smart telescopes (ZWO Seestar, DwarfLab DWARF, Vaonis Vespera, Unistellar and Celestron Origin) over DSS2 survey images, with geometric rotation and map zoom.
 - Night recommendations, observing windows and altitude curves for a selected date.
 - Best-month chart based on dark-time altitude and the selected horizon sector.
 - **N / NE / E / SE / S / SO / O / NO**, azimuth and altitude by local time.
@@ -100,7 +100,7 @@ The hosted app runs on Cloudflare Workers. Every push to `main` that passes CI i
 | --- | --- |
 | `app/atlas.tsx` | Application shell: header, night controls, catalogue list, method section |
 | `app/object-details.tsx` | Selected object panel: facts, night window and seasonality charts |
-| `app/fov-view.tsx` | Seestar field-of-view simulator over the survey image |
+| `app/fov-view.tsx` | Telescope field-of-view simulator over the survey image |
 | `app/choice.tsx` | Shared labelled `Select` used by the controls |
 | `app/site-picker.tsx` | Observing-location picker: geolocation and manual coordinates |
 | `lib/weather.ts` | Cloud forecast fetching, summarising and the coming-nights outlook |
@@ -147,12 +147,25 @@ Review provenance and licensing before adding another data source. The generatio
 
 ### Telescope geometry
 
-| Main camera | Aperture | Focal length | Sensor | Native pixels | Portrait FOV, approximately |
+| Main camera | Aperture | Focal length | Sensor | Native pixels (W × H) | FOV (W × H), approximately |
 | --- | --- | --- | --- | --- | --- |
-| Seestar S30 Pro | 30 mm | 160 mm | Sony IMX585 | 2160 × 3840, 2.9 μm | 2.24° × 3.99° |
-| Seestar S50 Pro | 50 mm | 260 mm | OmniVision OS08B10 | 2160 × 3840, 2.9 μm | 1.38° × 2.45° |
+| ZWO Seestar S30 | 30 mm | 150 mm | Sony IMX662 | 1080 × 1920, 2.9 μm | 1.20° × 2.13° |
+| ZWO Seestar S30 Pro | 30 mm | 160 mm | Sony IMX585 | 2160 × 3840, 2.9 μm | 2.24° × 3.99° |
+| ZWO Seestar S50 | 50 mm | 250 mm | Sony IMX462 | 1080 × 1920, 2.9 μm | 0.72° × 1.28° |
+| ZWO Seestar S50 Pro | 50 mm | 260 mm | OmniVision OS08B10 | 2160 × 3840, 2.9 μm | 1.38° × 2.45° |
+| DwarfLab DWARF mini | 30 mm | 150 mm | Sony IMX662 | 1920 × 1080, 2.9 μm | 2.13° × 1.20° |
+| DwarfLab DWARF II | 24 mm | 100 mm | Sony IMX415 | 3840 × 2160, 1.45 μm | 3.19° × 1.79° |
+| DwarfLab DWARF 3 | 35 mm | 150 mm | Sony IMX678 | 3840 × 2160, 2 μm | 2.93° × 1.65° |
+| Vaonis Vespera II | 50 mm | 250 mm | Sony IMX585 | 3840 × 2160, 2.9 μm | 2.55° × 1.44° |
+| Vaonis Vespera 3 | 50 mm | 245 mm | Sony IMX585 | 3840 × 2160, 2.9 μm | 2.60° × 1.46° |
+| Vaonis Vespera Pro | 50 mm | 250 mm | Sony IMX676 | 3536 × 3536, 2 μm | 1.62° × 1.62° |
+| Vaonis Vespera Pro 2 | 50 mm | 245 mm | Sony IMX676 | 3536 × 3536, 2 μm | 1.65° × 1.65° |
+| Unistellar Odyssey / Odyssey Pro | 85 mm | 320 mm | Sony IMX415 | 2880 × 2160, 1.45 μm | 0.75° × 0.56° |
+| Unistellar eVscope 2 | 114 mm | 450 mm | Sony IMX347 | 2048 × 1536, 2.9 μm | 0.76° × 0.57° |
+| Celestron Origin | 152 mm | 335 mm | Sony IMX178 | 3096 × 2080, 2.4 μm | 1.27° × 0.85° |
+| Celestron Origin Mark II | 152 mm | 335 mm | Sony IMX678 | 3856 × 2180, 2 μm | 1.32° × 0.75° |
 
-FOV is calculated as `2 × atan(sensor dimension / (2 × focal length))`. The overlay represents the native single frame, without mosaic or crop. Rotation is geometric, not a telescope command; alt-az field rotation is not animated. Yellow ellipses are catalogue dimensions, not exact boundaries of nebulosity. Survey images do not predict Seestar detail, colour or noise.
+FOV is calculated as `2 × atan(sensor dimension / (2 × focal length))`. The overlay represents the native single frame, without mosaic or crop. Rotation is geometric, not a telescope command; alt-az field rotation is not animated. Yellow ellipses are catalogue dimensions, not exact boundaries of nebulosity. Survey images do not predict your telescope's detail, colour or noise. Where a maker does not publish the pixel pitch, the sensor datasheet value is used; it reproduces the advertised field in every case. The Unistellar Odyssey's output size is not published, so 2880 × 2160 (the 4:3 crop of the IMX415 that reproduces its official 45′ × 33.6′) is assumed.
 
 ## Sources and credits
 

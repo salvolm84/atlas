@@ -21,6 +21,7 @@ import {
   cardinal,
   clock,
   fmt,
+  fov,
   daysFrom,
   makeNight,
   nextDate,
@@ -57,7 +58,7 @@ export default function Atlas({
   const [sector, setSector] = useState<Sector>({ start: 0, span: 360 });
   const [day, setDay] = useState(initialDate),
     [dateOpen, setDateOpen] = useState(false),
-    [scope, setScope] = useState<ScopeId>("s50");
+    [scope, setScope] = useState<ScopeId>("s50pro");
   const [mode, setMode] = useState("night"),
     [catalog, setCatalog] = useState("all"),
     [type, setType] = useState("deep"),
@@ -176,6 +177,8 @@ export default function Atlas({
   );
   const detail = useDetail(solver, detailParams, activeId, Number(day.slice(0, 4)), outlookDays);
   const calendarDate = new Date(day + "T12:00:00");
+  const instrument = scopes[scope],
+    field = fov(scope);
   function pickDate(d: string) {
     if (
       !/^\d{4}-\d{2}-\d{2}$/.test(d) ||
@@ -281,10 +284,7 @@ export default function Atlas({
               label="Telescope"
               value={scope}
               onChange={(s) => setScope(s as ScopeId)}
-              options={[
-                ["s30", "Seestar S30 Pro"],
-                ["s50", "Seestar S50 Pro"],
-              ]}
+              options={Object.entries(scopes).map(([id, s]) => [id, s.maker + " " + s.name])}
             />
           </div>
           <div>
@@ -332,14 +332,14 @@ export default function Atlas({
               <Search size={17} />
               <Input
                 aria-label="Search for an object"
-                placeholder="M42, C20, Cuore…"
+                placeholder="M42, C20, Heart…"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
               />
             </div>
             <div className="catalog-filters">
               <Choice
-                label="Catalogo"
+                label="Catalogue"
                 value={catalog}
                 onChange={setCatalog}
                 options={[
@@ -350,7 +350,7 @@ export default function Atlas({
                 ]}
               />
               <Choice
-                label="Tipo di oggetto"
+                label="Object type"
                 value={type}
                 onChange={setType}
                 options={[
@@ -359,7 +359,7 @@ export default function Atlas({
                   ["galaxy", "Galaxies"],
                   ["cluster", "Clusters"],
                   ["other", "Other objects"],
-                  ["all", "Tutte le tipologie"],
+                  ["all", "All types"],
                 ]}
               />
             </div>
@@ -495,17 +495,18 @@ export default function Atlas({
           <div>
             <h3>Instruments and provenance</h3>
             <p>
-              <a href={scopes[scope].source} target="_blank" rel="noreferrer">
-                {scopes[scope].name} · ZWO specifications ↗
+              <a href={instrument.source} target="_blank" rel="noreferrer">
+                {instrument.name} · {instrument.maker} specifications ↗
               </a>
               <br />
-              {scopes[scope].aperture} mm · {scopes[scope].focal} mm · {scopes[scope].sensor}
+              {instrument.aperture} mm · {instrument.focal} mm · {instrument.sensor}
               <br />
-              2160 × 3840 px · 2.9 μm pixels · a single frame, uncropped.
+              {instrument.width} × {instrument.height} px · {instrument.pixel} μm pixels · a single
+              frame, uncropped.
             </p>
             <p>
-              FOV = 2 atan(sensor dimension / 2f). The advertised 4.6° and 2.8° are approximately
-              the diagonals, not width × height.
+              FOV = 2 atan(sensor dimension / 2f) = {fmt(field.width, 2)}° × {fmt(field.height, 2)}
+              °. Advertised fields of view are often the diagonal, not width × height.
             </p>
             <div className="source-links">
               <a
@@ -541,7 +542,15 @@ export default function Atlas({
         </section>
       </div>
       <footer className="atlas-footer">
-        Deep Sky Atlas <span>Explore, frame, pick your night.</span>
+        <span>
+          Deep Sky Atlas · by <b>Salvatore La Malfa</b>
+        </span>
+        <span>
+          Explore, frame, pick your night. ·{" "}
+          <a href="https://github.com/salvolm84/atlas" target="_blank" rel="noreferrer">
+            Source on GitHub ↗
+          </a>
+        </span>
       </footer>
     </main>
   );
