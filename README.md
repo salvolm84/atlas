@@ -38,6 +38,7 @@ None of this applies to the portable ZIP. Service workers require an `http(s)` o
 ## What is included
 
 - All **110 Messier** and **109 Caldwell** catalogue designations, plus selected NGC, IC, Sharpless and Barnard objects. Catalogue overlaps are consolidated; Caldwell 14 retains its two components. The result is 248 entries, including clusters and a few other objects for catalogue completeness.
+- Dark and light themes, switched with the sun/moon button in the header and remembered per device. Dark is the default for use at night; survey images stay dark in both.
 - Distance, apparent magnitude and band, angular dimensions, J2000 coordinates, morphology and estimated average surface brightness where available. Unknown values remain explicitly unavailable.
 - Native-frame FOV simulation for 15 smart telescopes (ZWO Seestar, DwarfLab DWARF, Vaonis Vespera, Unistellar and Celestron Origin) over DSS2 survey images, with geometric rotation and map zoom. Up to six telescopes can be overlaid at once, each in its own labelled colour; the score uses whichever one you pick under “Score with”. The object list shows how much of that telescope's frame each object fills, by catalogued area (over 100% means larger than one frame).
 - Night recommendations, observing windows and altitude curves for a selected date.

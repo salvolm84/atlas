@@ -40,6 +40,7 @@ import { ObjectDetails } from "./object-details";
 import { FRAME_COLORS, type Framed } from "./fov-view";
 import { frameFill } from "@/lib/framing";
 import { SitePicker } from "./site-picker";
+import { ThemeToggle } from "./theme-toggle";
 import { useDetail, useRanked, useSolver } from "@/hooks/use-solver";
 import { toSolverObject, type NightParams } from "@/lib/solver-types";
 import { fetchClouds, fetchCloudRange, OUTLOOK_NIGHTS, type CloudForecast } from "@/lib/weather";
@@ -233,6 +234,7 @@ export default function Atlas({
           <a href="#method">Method and sources</a>
         </nav>
         <SitePicker site={site} onChange={setSite} />
+        <ThemeToggle />
       </header>
       <div className="atlas-workspace">
         <div className="atlas-intro">

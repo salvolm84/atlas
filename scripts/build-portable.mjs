@@ -50,13 +50,15 @@ const cssFiles = (await readdir(out)).filter((f) => f.endsWith(".css"));
 const css = (await Promise.all(cssFiles.map((f) => readFile(path.join(out, f), "utf8"))))
   .join("\n")
   .replace(/<\/style/gi, "<\\/style");
+// Same as THEME_INIT in app/theme-toggle.tsx: apply a saved light theme before paint.
+const THEME_INIT = `try{if(localStorage.getItem("atlas-theme")==="light")document.documentElement.dataset.theme="light"}catch(e){}`;
 for (const [name, page] of [
   ["index.html", "atlas"],
   ["morfologia.html", "morphology"],
 ]) {
   await writeFile(
     path.join(out, name),
-    `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="author" content="Salvatore La Malfa"><title>Deep Sky Atlas</title><link rel="icon" href="./favicon.svg"><style>${css}</style></head><body data-page="${page}"><div id="root"></div><noscript>Enable JavaScript to use the atlas.</noscript><script>${js}</script></body></html>`,
+    `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="author" content="Salvatore La Malfa"><script>${THEME_INIT}</script><title>Deep Sky Atlas</title><link rel="icon" href="./favicon.svg"><style>${css}</style></head><body data-page="${page}"><div id="root"></div><noscript>Enable JavaScript to use the atlas.</noscript><script>${js}</script></body></html>`,
   );
 }
 // public/data carries only what a reader should be able to open: the

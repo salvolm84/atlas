@@ -117,8 +117,8 @@ export function HorizonFilter({
           cx="110"
           cy="110"
           r="76"
-          fill="#09111f"
-          stroke="#35465b"
+          fill="var(--k-09111f, #09111f)"
+          stroke="var(--k-35465b, #35465b)"
           strokeWidth="2"
           aria-hidden="true"
         />
@@ -127,16 +127,16 @@ export function HorizonFilter({
             cx="110"
             cy="110"
             r="76"
-            fill="#78e5ff22"
-            stroke="#78e5ff"
+            fill="var(--k-78e5ff22, #78e5ff22)"
+            stroke="var(--k-78e5ff, #78e5ff)"
             strokeWidth="3"
             aria-hidden="true"
           />
         ) : (
           <path
             d={`M110 110 L${a.x} ${a.y} A76 76 0 ${sector.span > 180 ? 1 : 0} 1 ${b.x} ${b.y} Z`}
-            fill="#78e5ff33"
-            stroke="#78e5ff"
+            fill="var(--k-78e5ff33, #78e5ff33)"
+            stroke="var(--k-78e5ff, #78e5ff)"
             strokeWidth="2"
             aria-hidden="true"
           />
@@ -149,7 +149,7 @@ export function HorizonFilter({
               x={p.x}
               y={p.y + 5}
               textAnchor="middle"
-              fill="#d9e8f8"
+              fill="var(--k-d9e8f8, #d9e8f8)"
               fontSize="14"
               aria-hidden="true"
             >
@@ -161,8 +161,8 @@ export function HorizonFilter({
           cx={a.x}
           cy={a.y}
           r="9"
-          fill="#78e5ff"
-          stroke="#07101d"
+          fill="var(--k-78e5ff, #78e5ff)"
+          stroke="var(--k-07101d, #07101d)"
           strokeWidth="3"
           tabIndex={0}
           role="slider"
@@ -177,8 +177,8 @@ export function HorizonFilter({
           cx={b.x}
           cy={b.y}
           r="9"
-          fill="#f6c769"
-          stroke="#07101d"
+          fill="var(--k-f6c769, #f6c769)"
+          stroke="var(--k-07101d, #07101d)"
           strokeWidth="3"
           tabIndex={0}
           role="slider"
@@ -189,10 +189,24 @@ export function HorizonFilter({
           aria-valuetext={`${cardinal(endAzimuth)}, ${endAzimuth} degrees`}
           onKeyDown={(e) => nudge("end", e)}
         />
-        <text x="110" y="106" textAnchor="middle" fill="white" fontSize="23" aria-hidden="true">
+        <text
+          x="110"
+          y="106"
+          textAnchor="middle"
+          fill="var(--foreground)"
+          fontSize="23"
+          aria-hidden="true"
+        >
           {sector.span}°
         </text>
-        <text x="110" y="127" textAnchor="middle" fill="#acbfd4" fontSize="12" aria-hidden="true">
+        <text
+          x="110"
+          y="127"
+          textAnchor="middle"
+          fill="var(--k-acbfd4, #acbfd4)"
+          fontSize="12"
+          aria-hidden="true"
+        >
           visible
         </text>
       </svg>

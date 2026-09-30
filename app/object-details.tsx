@@ -235,9 +235,9 @@ function ObjectPanel({
         </div>
         <ChartContainer
           config={{
-            alt: { label: o.key, color: "#78e5ff" },
-            moon: { label: "Moon", color: "#b09dfc" },
-            cloud: { label: "Cloud", color: "#94a3b8" },
+            alt: { label: o.key, color: "var(--k-78e5ff, #78e5ff)" },
+            moon: { label: "Moon", color: "var(--k-b09dfc, #b09dfc)" },
+            cloud: { label: "Cloud", color: "var(--k-94a3b8, #94a3b8)" },
           }}
           className="altitude-chart"
         >
@@ -269,9 +269,9 @@ function ObjectPanel({
                 yAxisId="cloud"
                 type="monotone"
                 dataKey="cloud"
-                stroke="#94a3b8"
+                stroke="var(--k-94a3b8, #94a3b8)"
                 strokeWidth={1}
-                fill="#94a3b8"
+                fill="var(--k-94a3b8, #94a3b8)"
                 fillOpacity={0.16}
                 connectNulls={false}
                 dot={false}
@@ -283,12 +283,17 @@ function ObjectPanel({
                 yAxisId="alt"
                 x1={firstDark.ms}
                 x2={lastDark.ms}
-                fill="#78e5ff"
+                fill="var(--k-78e5ff, #78e5ff)"
                 fillOpacity={0.04}
               />
             )}
-            <ReferenceLine yAxisId="alt" y={minAlt} stroke="#7f95ad" strokeDasharray="4 4" />
-            <ReferenceLine yAxisId="alt" y={0} stroke="#4b576a" />
+            <ReferenceLine
+              yAxisId="alt"
+              y={minAlt}
+              stroke="var(--k-7f95ad, #7f95ad)"
+              strokeDasharray="4 4"
+            />
+            <ReferenceLine yAxisId="alt" y={0} stroke="var(--k-4b576a, #4b576a)" />
             <ChartTooltip
               labelFormatter={(v) => clock(Number(v), site)}
               formatter={(v, n) =>
@@ -296,13 +301,17 @@ function ObjectPanel({
                   ? [fmt(Number(v), 0) + "%", "Cloud"]
                   : [fmt(Number(v)) + "°", n === "alt" ? o.key : "Moon"]
               }
-              contentStyle={{ background: "#101a2c", border: "1px solid #334155", color: "white" }}
+              contentStyle={{
+                background: "var(--k-101a2c, #101a2c)",
+                border: "1px solid var(--k-334155, #334155)",
+                color: "var(--foreground)",
+              }}
             />
             <Line
               yAxisId="alt"
               type="monotone"
               dataKey="alt"
-              stroke="#78e5ff"
+              stroke="var(--k-78e5ff, #78e5ff)"
               strokeWidth={2.5}
               dot={false}
               isAnimationActive={false}
@@ -311,7 +320,7 @@ function ObjectPanel({
               yAxisId="alt"
               type="monotone"
               dataKey="moon"
-              stroke="#b09dfc"
+              stroke="var(--k-b09dfc, #b09dfc)"
               strokeWidth={1.5}
               strokeDasharray="4 4"
               dot={false}
@@ -428,7 +437,7 @@ function ObjectPanel({
           </div>
         </div>
         <ChartContainer
-          config={{ hours: { label: "Useful hours", color: "#78e5ff" } }}
+          config={{ hours: { label: "Useful hours", color: "var(--k-78e5ff, #78e5ff)" } }}
           className="season-chart"
         >
           <BarChart
@@ -440,9 +449,17 @@ function ObjectPanel({
             <YAxis tick={{ fontSize: 12 }} tickFormatter={(v) => v + "h"} />
             <ChartTooltip
               formatter={(v) => [fmt(Number(v)) + " h", "Darkness above threshold"]}
-              contentStyle={{ background: "#101a2c", border: "1px solid #334155" }}
+              contentStyle={{
+                background: "var(--k-101a2c, #101a2c)",
+                border: "1px solid var(--k-334155, #334155)",
+              }}
             />
-            <Bar dataKey="hours" fill="#78e5ff" radius={[4, 4, 0, 0]} isAnimationActive={false} />
+            <Bar
+              dataKey="hours"
+              fill="var(--k-78e5ff, #78e5ff)"
+              radius={[4, 4, 0, 0]}
+              isAnimationActive={false}
+            />
           </BarChart>
         </ChartContainer>
         <p className="caption">

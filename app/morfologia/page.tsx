@@ -11,6 +11,7 @@ import {
   Orbit,
   Sparkles,
 } from "lucide-react";
+import { ThemeToggle } from "../theme-toggle";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 type Galaxy = {
@@ -189,7 +190,7 @@ export default function Home() {
   );
 
   return (
-    <main className="min-h-screen overflow-hidden bg-background text-foreground">
+    <main className="morph-page min-h-screen overflow-hidden bg-background text-foreground">
       <div className="sky-noise" aria-hidden="true" />
       <header className="relative z-10 border-b border-white/10">
         <div className="mx-auto flex max-w-[1500px] items-center justify-between px-5 py-4 sm:px-8 lg:px-12">
@@ -204,6 +205,7 @@ export default function Home() {
             <span className="h-1 w-1 rounded-full bg-cyan-300" />
             <span>Astrophotography guide</span>
           </div>
+          <ThemeToggle />
         </div>
       </header>
 
@@ -248,7 +250,7 @@ export default function Home() {
           className="galaxy-stage"
           style={{ "--galaxy-accent": selected.accent } as CSSProperties}
         >
-          <div className="relative min-h-[420px] overflow-hidden lg:min-h-[570px]">
+          <div className="galaxy-visual relative min-h-[420px] overflow-hidden lg:min-h-[570px]">
             {/* Photographs are hotlinked from ESA/NASA and the page also ships in
                 the portable `file://` release, where next/image has no optimizer
                 to call. A plain <img> is the correct element here. */}
@@ -277,7 +279,7 @@ export default function Home() {
             </div>
           </div>
 
-          <article className="flex flex-col bg-[#0c1324]/95 p-5 sm:p-8 lg:p-10">
+          <article className="flex flex-col bg-[var(--k-0c1324,#0c1324)]/95 p-5 sm:p-8 lg:p-10">
             <div>
               <p className="eyebrow">Morphological profile</p>
               <h3 className="mt-3 font-display text-3xl font-semibold tracking-tight sm:text-4xl">
@@ -293,7 +295,7 @@ export default function Home() {
               ].map(([value, label], index) => {
                 const Icon = statIcons[index];
                 return (
-                  <div key={label} className="bg-[#0c1324] p-3 sm:p-4">
+                  <div key={label} className="bg-[var(--k-0c1324,#0c1324)] p-3 sm:p-4">
                     <Icon className="mb-3 h-4 w-4 text-cyan-300" aria-hidden="true" />
                     <p className="font-display text-base font-semibold text-white sm:text-lg">
                       {value}
@@ -308,7 +310,7 @@ export default function Home() {
             <div className="rounded-xl border border-white/10 bg-white/[0.035] p-4">
               <div className="flex items-start gap-3">
                 <CircleDot
-                  className="mt-1 h-4 w-4 shrink-0 text-[var(--galaxy-accent)]"
+                  className="mt-1 h-4 w-4 shrink-0 text-[var(--galaxy-ink,var(--galaxy-accent))]"
                   aria-hidden="true"
                 />
                 <div>
@@ -381,12 +383,12 @@ export default function Home() {
           <div>
             <p className="eyebrow">Acquisition sheet</p>
             <h2 className="mt-3 font-display text-3xl font-semibold tracking-tight sm:text-4xl">
-              Pianifica lo scatto di {selected.example}
+              Plan a session on {selected.example}
             </h2>
           </div>
           <p className="max-w-md text-sm leading-6 text-slate-500">
-            Valori orientativi per un setup deep-sky amatoriale; seeing, cielo e sensore possono
-            cambiare radicalmente il risultato.
+            Indicative values for an amateur deep-sky setup; seeing, sky quality and sensor can
+            change the result dramatically.
           </p>
         </div>
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
