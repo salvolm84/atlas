@@ -92,6 +92,8 @@ GitHub Actions runs all of the above except packaging, on Node 22.13.0 and 24, a
 
 The existing `pnpm build` / `pnpm start` scripts target the original hosted Worker application. **Use `build:portable` for the standalone release.**
 
+The hosted app runs on Cloudflare Workers. Every push to `main` that passes CI is deployed by the `deploy` job, using the repository secrets `CLOUDFLARE_API_TOKEN` (an API token from the "Edit Cloudflare Workers" template) and `CLOUDFLARE_ACCOUNT_ID`. To deploy by hand: `pnpm build`, then `pnpm exec wrangler deploy --config dist/server/wrangler.json` (not `pnpm start`, which runs a local sandbox).
+
 ### Where to make changes
 
 | File | Purpose |
