@@ -1,5 +1,5 @@
 "use client";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ArrowUpRight, Cloud, Stars } from "lucide-react";
 import { ChartContainer, ChartTooltip } from "@/components/ui/chart";
 import {
@@ -40,6 +40,7 @@ import {
   type TargetNight,
 } from "@/lib/sky";
 import { FovView, type Framed } from "./fov-view";
+import { fetchWikiSummary, wikiTitle, type WikiSummary } from "@/lib/wikipedia";
 type PanelProps = {
   o: DSO;
   detail: DetailResult | null;
@@ -147,6 +148,7 @@ function ObjectPanel({
           <span>/100 tonight</span>
         </div>
       </header>
+      <WikiAbout id={o.id} />
       {maxPossible <= 0 ? (
         <div className="notice warning">
           Never rises from {site.name}: declination {fmt(o.dec, 1)}°. Still browsable in the atlas.
@@ -479,5 +481,62 @@ function ObjectPanel({
         </a>
       </div>
     </article>
+  );
+}
+
+const WIKI_LOADING: WikiSummary = { state: "loading" };
+
+/** Wikipedia's lead for the object, credited; nothing at all when there is none. */
+function WikiAbout({ id }: { id: string }) {
+  const title = wikiTitle(id);
+  // Tagged with its article, so a result for the previous object never shows.
+  const [loaded, setLoaded] = useState<{ title: string; value: WikiSummary } | null>(null);
+  const summary = loaded && loaded.title === title ? loaded.value : WIKI_LOADING;
+  // Phones clamp the text so tonight's numbers stay near the top; desktop
+  // ignores this and always shows it whole.
+  const [expanded, setExpanded] = useState(false);
+  useEffect(() => {
+    if (!title) return;
+    const controller = new AbortController();
+    fetchWikiSummary(title, controller.signal)
+      .then((value) => setLoaded({ title, value }))
+      .catch(() => {}); // only ever an abort
+    return () => controller.abort();
+  }, [title]);
+  if (!title || summary.state === "unavailable") return null;
+  return (
+    <section
+      className={"wiki-about" + (expanded ? "" : " clamped")}
+      aria-label="Description from Wikipedia"
+      aria-busy={summary.state === "loading"}
+    >
+      {summary.state === "loading" ? (
+        <p className="caption">Loading the Wikipedia summary…</p>
+      ) : (
+        <>
+          <p>{summary.extract}</p>
+          {/* About five phone lines; anything shorter is never clamped. */}
+          {summary.extract.length > 240 && (
+            <button className="wiki-more" onClick={() => setExpanded(!expanded)}>
+              {expanded ? "Show less" : "Show more"}
+            </button>
+          )}
+          <p className="caption">
+            From Wikipedia,{" "}
+            <a href={summary.url} target="_blank" rel="noreferrer">
+              {summary.title} ↗
+            </a>{" "}
+            ·{" "}
+            <a
+              href="https://creativecommons.org/licenses/by-sa/4.0/"
+              target="_blank"
+              rel="noreferrer"
+            >
+              CC BY-SA 4.0
+            </a>
+          </p>
+        </>
+      )}
+    </section>
   );
 }

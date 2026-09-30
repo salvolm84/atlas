@@ -173,6 +173,7 @@ FOV is calculated as `2 × atan(sensor dimension / (2 × focal length))`. The ov
 - NASA/Hubble distances supplement [M65](https://science.nasa.gov/mission/hubble/science/explore-the-night-sky/hubble-messier-catalog/messier-65/) and [C68](https://science.nasa.gov/mission/hubble/science/explore-the-night-sky/hubble-caldwell-catalog/caldwell-68/).
 - [Astronomy Engine](https://github.com/cosinekitty/astronomy) supplies astronomical calculations.
 - Cloud forecasts come from [Open-Meteo](https://open-meteo.com/), used without an API key. Their data is licensed CC BY 4.0.
+- Object descriptions are the lead of the matching [English Wikipedia](https://en.wikipedia.org/) article, fetched live for the selected object and credited beside it; the text is CC BY-SA 4.0 and is not stored in this repository. Only the object-to-article mapping, `lib/wikipedia-titles.json`, is committed; regenerate it with `python3 scripts/build-wikipedia-titles.py`. Offline, the description is simply absent.
 - DSS2/STScI sky imagery is requested through [CDS HiPS2FITS](https://alasky.cds.unistra.fr/hips-image-services/hips2fits).
 - Instrument references: ZWO [S30 Pro](https://www.seestar.com/products/seestar-s30-pro) and [S50 Pro](https://www.seestar.com/products/seestar-s50-pro-smart-telescope).
 - The morphology guide credits and links each photograph in its interface. Photographs are loaded from their providers, not included in the ZIP.

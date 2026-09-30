@@ -136,6 +136,15 @@ for (const o of s.objects.filter((o) => s.neverRises(o.dec, MODENA))) {
   assert.equal(s.targetNight(m42, summer).hours, 0);
 }
 
+// The Wikipedia mapping is generated from the catalogue; a stale one would point
+// objects at the wrong article, so every id must exist and nearly all be mapped.
+{
+  const titles = require("../lib/wikipedia-titles.json");
+  const ids = new Set(s.objects.map((o) => o.id));
+  for (const [id, title] of Object.entries(titles)) assert(ids.has(id) && title, id);
+  assert(Object.keys(titles).length >= 240);
+}
+
 // Framing geometry moved to lib/framing.ts; check it still loads and agrees.
 const framing = load("../lib/framing.ts", { "./sky": s });
 const m31 = s.objects.find((o) => o.messier === 31);

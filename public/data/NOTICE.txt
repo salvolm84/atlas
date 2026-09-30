@@ -32,6 +32,12 @@ Requested without an API key. Only a latitude and longitude rounded to two
 decimal places, and the requested dates, leave the browser. The forecast is
 displayed beside the astronomy and is not an input to the 0-100 score.
 
+Object descriptions from English Wikipedia, https://en.wikipedia.org/
+Text licensed CC BY-SA 4.0: https://creativecommons.org/licenses/by-sa/4.0/
+Fetched live for the selected object only and shown with a link to its
+article; no Wikipedia text is stored in the atlas. Only the article title
+leaves the browser.
+
 DSS2 photographs from STScI, accessed via CDS HiPS2FITS.
 This work makes use of hips2fits, a service provided by CDS.
 https://alasky.cds.unistra.fr/hips-image-services/hips2fits

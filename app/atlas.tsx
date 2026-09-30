@@ -543,6 +543,9 @@ export default function Atlas({
               <a href="https://open-meteo.com/" target="_blank" rel="noreferrer">
                 Open-Meteo cloud forecast · CC BY 4.0
               </a>
+              <a href="https://en.wikipedia.org/" target="_blank" rel="noreferrer">
+                Wikipedia descriptions · CC BY-SA 4.0
+              </a>
               <a
                 href="https://alasky.cds.unistra.fr/hips-image-services/hips2fits"
                 target="_blank"
