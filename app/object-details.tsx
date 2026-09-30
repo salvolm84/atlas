@@ -39,13 +39,16 @@ import {
   type ScopeId,
   type TargetNight,
 } from "@/lib/sky";
-import { FovView } from "./fov-view";
+import { FovView, type Framed } from "./fov-view";
 type PanelProps = {
   o: DSO;
   detail: DetailResult | null;
   day: string;
   minAlt: number;
   scope: ScopeId;
+  framed: Framed[];
+  onToggleScope: (id: ScopeId) => void;
+  onScoreWith: (id: ScopeId) => void;
   site: Site;
   clouds: CloudForecast;
   outlook: CloudForecast;
@@ -81,6 +84,9 @@ function ObjectPanel({
   day,
   minAlt,
   scope,
+  framed,
+  onToggleScope,
+  onScoreWith,
   site,
   clouds,
   outlook,
@@ -195,8 +201,14 @@ function ObjectPanel({
         the band; it is not an intrinsic luminosity. Distances and sizes are catalogue estimates.
       </p>
       <DirectionDetails r={r} site={site} />
-      <ErrorBoundary area="The field simulator" resetKey={o.id + scope}>
-        <FovView o={o} scope={scope} />
+      <ErrorBoundary area="The field simulator" resetKey={o.id + framed.map((x) => x.id).join()}>
+        <FovView
+          o={o}
+          scope={scope}
+          framed={framed}
+          onToggle={onToggleScope}
+          onScoreWith={onScoreWith}
+        />
       </ErrorBoundary>
       <section className="night-detail">
         <div className="section-heading">

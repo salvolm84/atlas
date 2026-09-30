@@ -37,6 +37,7 @@ import {
 } from "@/lib/sky";
 import { Choice } from "./choice";
 import { ObjectDetails } from "./object-details";
+import { FRAME_COLORS, type Framed } from "./fov-view";
 import { SitePicker } from "./site-picker";
 import { useDetail, useRanked, useSolver } from "@/hooks/use-solver";
 import { toSolverObject, type NightParams } from "@/lib/solver-types";
@@ -58,7 +59,21 @@ export default function Atlas({
   const [sector, setSector] = useState<Sector>({ start: 0, span: 360 });
   const [day, setDay] = useState(initialDate),
     [dateOpen, setDateOpen] = useState(false),
-    [scope, setScope] = useState<ScopeId>("s50pro");
+    [scoreWith, setScoreWith] = useState<ScopeId>("s50pro");
+  // The simulator compares several telescopes; each keeps its colour while it
+  // stays selected, so removing one never recolours the others.
+  const [framed, setFramed] = useState<Framed[]>([{ id: "s50pro", color: FRAME_COLORS[0] }]);
+  // Derived, not synced: deselecting the scoring telescope hands the score to
+  // the first one still selected.
+  const scope = framed.some((x) => x.id === scoreWith) ? scoreWith : framed[0].id;
+  function toggleScope(id: ScopeId) {
+    if (framed.some((x) => x.id === id)) {
+      if (framed.length > 1) setFramed(framed.filter((x) => x.id !== id));
+    } else if (framed.length < FRAME_COLORS.length) {
+      const color = FRAME_COLORS.find((c) => !framed.some((x) => x.color === c))!;
+      setFramed([...framed, { id, color }]);
+    }
+  }
   const [mode, setMode] = useState("night"),
     [catalog, setCatalog] = useState("all"),
     [type, setType] = useState("deep"),
@@ -279,15 +294,6 @@ export default function Atlas({
             </Popover>
           </div>
           <div>
-            <label>Telescope · main camera</label>
-            <Choice
-              label="Telescope"
-              value={scope}
-              onChange={(s) => setScope(s as ScopeId)}
-              options={Object.entries(scopes).map(([id, s]) => [id, s.maker + " " + s.name])}
-            />
-          </div>
-          <div>
             <label>Minimum altitude</label>
             <Choice
               label="Minimum altitude"
@@ -450,6 +456,9 @@ export default function Atlas({
                   day={day}
                   minAlt={Number(minAlt)}
                   scope={scope}
+                  framed={framed}
+                  onToggleScope={toggleScope}
+                  onScoreWith={setScoreWith}
                   site={site}
                   clouds={clouds}
                   outlook={outlook}
